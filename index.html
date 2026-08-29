@@ -1,0 +1,2903 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1211">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>英単フラッシュ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Libre+Franklin:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f3f6f4; --surface:#ffffff; --surface-2:#eaefec;
+  --ink:#141d1a; --ink-2:#3a4a45; --muted:#66776f;
+  --line:#d3ded8; --line-strong:#b3c4bc;
+  --accent:#0c6b58; --accent-ink:#ffffff; --accent-soft:#dcefe8;
+  --flag:#9c4318; --flag-soft:#f7e7de;
+  --shadow:0 1px 2px rgba(20,29,26,.05), 0 10px 28px -20px rgba(20,29,26,.4);
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --sans:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --serif:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --eng:"Libre Franklin","Helvetica Neue",Arial,sans-serif;
+  /* 再生画面は単一の暗い表示面に固定する。0.5秒で切り替わる文字を読む間、
+     地の明るさが端末設定で変わらないほうが目が慣れるため。 */
+  --barh:96px;
+  --dp-bg:#0b1211; --dp-fg:#f2f7f4; --dp-dim:#7e948c;
+  --dp-line:#22322e; --dp-acc:#5fd3b2; --dp-on-acc:#062019; --dp-warn:#e79a6b;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]):not([data-palette]){
+    --ground:#0e1614; --surface:#151f1c; --surface-2:#1c2926;
+    --ink:#e4ece8; --ink-2:#b6c6c0; --muted:#879992;
+    --line:#2a3a35; --line-strong:#3c514b;
+    --accent:#4cbfa2; --accent-ink:#08201b; --accent-soft:#152e28;
+    --flag:#e08a5e; --flag-soft:#2d1d14;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -20px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]:not([data-palette]){
+  --ground:#0e1614; --surface:#151f1c; --surface-2:#1c2926;
+  --ink:#e4ece8; --ink-2:#b6c6c0; --muted:#879992;
+  --line:#2a3a35; --line-strong:#3c514b;
+  --accent:#4cbfa2; --accent-ink:#08201b; --accent-soft:#152e28;
+  --flag:#e08a5e; --flag-soft:#2d1d14;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -20px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ============ 共通 ============ */
+.wrap{max-width:720px;margin:0 auto;padding:0 20px 80px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(24px,5vw,34px);line-height:1.4;margin:0;text-wrap:balance}
+h2{font-family:var(--serif);font-weight:700;font-size:18px;margin:0 0 12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow)}
+.btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 16px;font-weight:500;line-height:1.4}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.primary:hover{color:var(--accent-ink);filter:brightness(1.08)}
+.btn.big{width:100%;padding:16px;font-size:17px;border-radius:10px}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--surface);color:var(--ink-2);padding:9px 6px;font-size:13.5px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.hide{display:none!important}
+
+
+/* ============ 配色（ホーム画面で選ぶ） ============
+   配色を選ぶと、その配色が決めた明るさに固定される。
+   標準だけは端末のライト／ダーク設定に追随する。 */
+/* こんまり：薄いベージュを地に、濃い部分はグレージュ。緑は使わない */
+:root[data-palette="konmari"]{
+  --ground:#f0e9de; --surface:#f9f5ef; --surface-2:#e5dccf;
+  --ink:#443c33; --ink-2:#5e5348; --muted:#7c7060;
+  --line:#ded3c4; --line-strong:#c6b9a8;
+  --accent:#7e7267; --accent-ink:#faf7f2; --accent-soft:#e7e0d6;
+  --flag:#a67f6d; --flag-soft:#efe2da;
+  --shadow:0 1px 2px rgba(68,60,51,.06), 0 10px 28px -20px rgba(68,60,51,.35);
+  --dp-bg:#f0e9de; --dp-fg:#443c33; --dp-dim:#7c7060;
+  --dp-line:#ddd2c3; --dp-acc:#7e7267; --dp-on-acc:#faf7f2; --dp-warn:#a67f6d;
+}
+/* モノクロ：白と黒だけ */
+:root[data-palette="mono"]{
+  --ground:#0a0a0a; --surface:#141414; --surface-2:#1e1e1e;
+  --ink:#f5f5f5; --ink-2:#c8c8c8; --muted:#8a8a8a;
+  --line:#262626; --line-strong:#3d3d3d;
+  --accent:#ffffff; --accent-ink:#000000; --accent-soft:#1c1c1c;
+  --flag:#bdbdbd; --flag-soft:#1a1a1a;
+  --shadow:0 1px 2px rgba(0,0,0,.7), 0 10px 28px -20px rgba(0,0,0,1);
+  --dp-bg:#000000; --dp-fg:#ffffff; --dp-dim:#909090;
+  --dp-line:#262626; --dp-acc:#ffffff; --dp-on-acc:#000000; --dp-warn:#bdbdbd;
+}
+/* オランジュ：黒に近い地に鮮やかなオレンジ */
+:root[data-palette="orange"]{
+  --ground:#14100c; --surface:#1c1712; --surface-2:#251e17;
+  --ink:#f3ede5; --ink-2:#c4b8a8; --muted:#8e8171;
+  --line:#2c241b; --line-strong:#423527;
+  --accent:#f07300; --accent-ink:#14100c; --accent-soft:#2a1a08;
+  --flag:#d9a441; --flag-soft:#241a08;
+  --shadow:0 1px 2px rgba(0,0,0,.7), 0 10px 28px -20px rgba(0,0,0,1);
+  --dp-bg:#100d09; --dp-fg:#f7f2ea; --dp-dim:#8e8171;
+  --dp-line:#2a2219; --dp-acc:#f07300; --dp-on-acc:#14100c; --dp-warn:#d9a441;
+}
+/* モノグラム：焦茶の地に金 */
+:root[data-palette="monogram"]{
+  --ground:#17110b; --surface:#1f1710; --surface-2:#2a2016;
+  --ink:#f1e8da; --ink-2:#c3b49b; --muted:#8e7f68;
+  --line:#2e2418; --line-strong:#453522;
+  --accent:#c9a227; --accent-ink:#17110b; --accent-soft:#2a2010;
+  --flag:#b5713f; --flag-soft:#241609;
+  --shadow:0 1px 2px rgba(0,0,0,.7), 0 10px 28px -20px rgba(0,0,0,1);
+  --dp-bg:#120d08; --dp-fg:#f3eadb; --dp-dim:#8e7f68;
+  --dp-line:#2a2116; --dp-acc:#c9a227; --dp-on-acc:#17110b; --dp-warn:#b5713f;
+}
+:root[data-palette="paper"]{
+  --ground:#ffffff; --surface:#ffffff; --surface-2:#f1f2f5;
+  --ink:#15203a; --ink-2:#3d4a67; --muted:#6c7791;
+  --line:#dde1e9; --line-strong:#c2c8d6;
+  --accent:#1f3f8f; --accent-ink:#ffffff; --accent-soft:#e5eafa;
+  --flag:#9b2f2f; --flag-soft:#fae5e5;
+  --shadow:0 1px 2px rgba(21,32,58,.06), 0 10px 28px -20px rgba(21,32,58,.35);
+  --dp-bg:#ffffff; --dp-fg:#15203a; --dp-dim:#6c7791;
+  --dp-line:#dde1e9; --dp-acc:#1f3f8f; --dp-on-acc:#ffffff; --dp-warn:#9b2f2f;
+}
+/* ホームの配色チップ */
+.pal{display:flex;gap:8px}
+.pal button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;
+  padding:9px 6px;min-height:56px;touch-action:manipulation}
+.pal button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.pal .sw{display:flex;flex:none;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.pal .sw i{width:11px;height:30px;display:block}
+
+/* ============ S1 ホーム ============ */
+header.top{padding:44px 0 26px}
+.sub{margin:10px 0 0;color:var(--ink-2);font-size:14.5px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 14px}
+.stat{background:var(--surface);padding:16px 14px}
+.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.stat .v{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;line-height:1.3;margin-top:2px}
+.stat.acc .v{color:var(--accent)}
+.bar{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:0 0 20px}
+.bar > i{display:block;height:100%;background:var(--accent);transition:width .5s ease}
+.week{display:flex;gap:6px;align-items:flex-end;height:56px;margin:6px 0 0}
+.week div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
+.week .b{width:100%;max-width:24px;background:var(--accent);border-radius:3px;min-height:3px;opacity:.85}
+.week .b.zero{background:var(--line);opacity:1}
+.week .d{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.field{margin:0 0 16px}
+.field > label{display:block;font-size:12.5px;font-family:var(--mono);letter-spacing:.08em;color:var(--muted);margin:0 0 7px;text-transform:uppercase}
+.rng{display:flex;gap:8px;align-items:center;margin-top:10px}
+.rng input{width:88px;font-family:var(--mono);font-size:14px;padding:8px 10px;border:1px solid var(--line-strong);border-radius:7px;background:var(--surface);color:var(--ink)}
+.note{font-size:13px;color:var(--muted);margin:14px 0 0}
+.note b{color:var(--ink-2);font-weight:500}
+.linkbar{display:flex;gap:16px;margin:24px 0 0;font-size:13px}
+.linkbar button{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:0}
+.linkbar button:hover{color:var(--accent)}
+.ver{margin:28px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);opacity:.8}
+.chk{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:14px;color:var(--ink-2);cursor:pointer;min-height:32px}
+.fgroup{margin:20px 0 0}
+.fhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.fhead span{font-size:12.5px;font-family:var(--mono);letter-spacing:.08em;color:var(--muted)}
+.mini{background:none;border:1px solid var(--line-strong);color:var(--muted);border-radius:6px;padding:5px 10px;font-size:12px}
+.mini:hover{border-color:var(--accent);color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);
+  border-radius:999px;padding:0 15px;min-height:40px;font-size:13.5px;touch-action:manipulation}
+.chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.chk input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--line);padding:.08em .38em;border-radius:4px;white-space:nowrap}
+#csv-text{width:100%;margin-top:14px;font-family:var(--mono);font-size:11.5px;line-height:1.5;
+  background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
+
+/* ============ S2 再生 ============ */
+/* モバイルのブラウザ下部バーが再生画面の下端を覆うと設定バーが押せなくなるため、
+   ビューポートの実高さ（dvh）を使う */
+.player{position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;
+  background:var(--dp-bg);color:var(--dp-fg);display:flex;flex-direction:column;z-index:50}
+.p-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px;position:relative;z-index:3;flex:none}
+.p-top .tbtns{display:flex;gap:8px;flex:none}
+.p-top .ctl{min-height:42px;padding:0 14px;touch-action:manipulation}
+.p-top .pos{font-family:var(--mono);font-size:13px;color:var(--dp-dim);font-variant-numeric:tabular-nums}
+.p-top .pos b{color:var(--dp-fg);font-weight:500}
+.ctl{border:1px solid var(--dp-line);background:transparent;color:var(--dp-fg);border-radius:8px;padding:8px 14px;font-size:13.5px;line-height:1.3}
+.ctl:hover{border-color:var(--dp-acc);color:var(--dp-acc)}
+.ctl.acc{background:var(--dp-acc);border-color:var(--dp-acc);color:var(--dp-on-acc);font-weight:700}
+.ctl.warn{border-color:var(--dp-warn);color:var(--dp-warn)}
+
+.taplayer{position:absolute;inset:0;z-index:1}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px 52px;position:relative;z-index:2;pointer-events:none;text-align:center;min-height:0}
+.word{font-family:var(--eng);font-weight:600;font-size:clamp(38px,11vw,76px);line-height:1.15;letter-spacing:-.015em;word-break:break-word}
+.meaning{font-size:clamp(16px,4.4vw,24px);color:var(--dp-dim);margin-top:18px;line-height:1.6;max-width:22em}
+.meaning.ghost{opacity:.18}
+.badge{margin-top:22px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dp-acc);border:1px solid var(--dp-acc);border-radius:99px;padding:3px 12px}
+
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:6px;z-index:4;
+  background:var(--dp-acc);color:var(--dp-on-acc);font-weight:700;font-size:14px;padding:9px 18px;border-radius:99px;
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .16s}
+.toast.on{opacity:1}
+.toast.undo{background:var(--dp-warn)}
+
+/* 操作ボタンは重ねず、常に画面下部の帯として置く。停止中もカードは隠さない */
+.actionbar{flex:none;position:relative;z-index:3;padding:0 12px 10px;display:flex;flex-direction:column;gap:8px}
+.arow{display:flex;gap:8px}
+.arow .ctl{flex:1;min-width:0;min-height:52px;padding:0 10px;font-size:15px;touch-action:manipulation}
+.arow .ctl.mark{background:var(--dp-acc);border-color:var(--dp-acc);color:var(--dp-on-acc);font-weight:700;font-size:16px}
+.arow .ctl.mark.on{background:transparent;color:var(--dp-warn);border-color:var(--dp-warn);font-weight:500}
+.arow .ctl:active{filter:brightness(1.25)}
+.arow.center{justify-content:center}
+.arow.center .ctl{flex:0 1 auto;width:min(100%,340px);min-height:56px}
+
+.setbar{flex:none;position:relative;z-index:3;border-top:1px solid var(--dp-line);background:var(--dp-bg);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));max-height:56vh;overflow-y:auto}
+.setbar .srow{display:flex;gap:8px;align-items:stretch;margin-bottom:8px}
+.setbar .seg2{flex:1;display:flex;border:1px solid var(--dp-line);border-radius:8px;overflow:hidden;min-width:0}
+.setbar .seg2 button{flex:1;min-width:0;border:0;background:transparent;color:var(--dp-dim);
+  min-height:44px;padding:0 6px;font-size:12.5px;font-family:var(--mono);border-right:1px solid var(--dp-line);
+  touch-action:manipulation;line-height:1.3}
+.setbar .seg2 button:last-child{border-right:0}
+.setbar .seg2 button[aria-pressed="true"]{background:var(--dp-acc);color:var(--dp-on-acc);font-weight:500}
+.setbar .seg2 button:active{background:rgba(95,211,178,.28)}
+.setbar .seg2 button:disabled{opacity:.3;cursor:not-allowed}
+.setbar .ctl.sm{flex:none;min-height:44px;padding:0 14px;font-size:12px;font-family:var(--mono);touch-action:manipulation}
+.setbar .slid{display:flex;gap:10px;align-items:center;min-height:36px}
+.setbar .slid label{font-family:var(--mono);font-size:11.5px;color:var(--dp-dim);white-space:nowrap;letter-spacing:.06em;min-width:56px}
+.setbar .slid input[type=range]{flex:1;min-width:60px;accent-color:var(--dp-acc);height:30px;touch-action:manipulation}
+.setbar .slid .v{font-family:var(--mono);font-size:12.5px;color:var(--dp-fg);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:58px;text-align:right}
+.setbar .slid.off label,.setbar .slid.off .v{opacity:.35}
+.setbar #detail.closed{display:none}
+.setbar .srow.top{align-items:center;margin-bottom:0}
+.setbar #detail{padding-top:8px}
+.condline{flex:1;min-width:0;font-family:var(--mono);font-size:11.5px;color:var(--dp-dim);
+  line-height:1.35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.setbar .na{font-family:var(--mono);font-size:11.5px;color:var(--dp-warn);line-height:1.45;margin:0 0 8px}
+
+/* ============ S3 結果 ============ */
+.res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 18px}
+.res-grid .stat{padding:14px}
+.res-grid .stat .v{font-size:22px}
+.mlist{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.mlist .r{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.mlist .r:last-child{border-bottom:0}
+.mlist .w{font-family:var(--eng);font-weight:600;font-size:16px;flex:none;min-width:0}
+.mlist .m{color:var(--muted);font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mlist .r.off .w,.mlist .r.off .m{opacity:.4;text-decoration:line-through}
+.mlist button{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:6px;padding:5px 10px;font-size:12px;flex:none}
+.mlist button:hover{border-color:var(--flag);color:var(--flag)}
+.empty{padding:22px 14px;color:var(--muted);font-size:14px;text-align:center}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<!-- ================= S1 ホーム ================= -->
+<div class="wrap" id="s1">
+  <header class="top">
+    <h1>英単フラッシュ</h1>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="k">暗記済</div><div class="v" id="st-learned">0</div></div>
+    <div class="stat"><div class="k">未暗記</div><div class="v" id="st-left">0</div></div>
+    <div class="stat acc"><div class="k">暗記率</div><div class="v" id="st-rate">0.0%</div></div>
+  </div>
+  <div class="bar"><i id="st-bar" style="width:0%"></i></div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h2>出題範囲</h2>
+    <label class="chk"><input type="checkbox" id="sc-new" checked> 未暗記のみにする</label>
+    <label class="chk"><input type="checkbox" id="sc-range"> 番号で絞る</label>
+    <div class="rng hide" id="scope-range">
+      <input type="number" id="rng-from" min="1" value="1" aria-label="開始番号">
+      <span class="mono" style="color:var(--muted)">–</span>
+      <input type="number" id="rng-to" min="1" value="50" aria-label="終了番号">
+    </div>
+
+    <div class="fgroup hide" id="pos-box">
+      <div class="fhead"><span>品詞で絞る</span><button class="mini" id="pos-all">すべて</button></div>
+      <div class="chips" id="pos-chips"></div>
+    </div>
+    <div class="fgroup hide" id="lv-box">
+      <div class="fhead"><span>レベルで絞る</span><button class="mini" id="lv-all">すべて</button></div>
+      <div class="chips" id="lv-chips"></div>
+    </div>
+
+    <h2 style="margin:22px 0 12px">出題順</h2>
+    <div class="seg" id="order-seg">
+      <button data-order="seq" aria-pressed="true">登録順</button>
+      <button data-order="random" aria-pressed="false">ランダム</button>
+    </div>
+    <p class="note">対象 <b id="scope-count">0</b> 枚 ／ <b id="home-order">登録順</b> ／ 表示間隔 <b id="home-int">0.50</b> 秒 ／ <b id="home-mode">語義同時</b> ／ 発音 <b id="home-speak">流す</b></p>
+  </div>
+
+  <button class="btn primary big" id="btn-start">開始</button>
+
+  <div class="card hide" style="margin-top:22px">
+    <h2>単語データ</h2>
+    <p class="note" style="margin:0 0 14px">いま <b id="data-count">1712</b> 語（<span id="data-src">同梱の1712語</span>）</p>
+    <div class="row">
+      <label class="btn" for="csv-in" style="cursor:pointer">CSVを読み込む</label>
+      <input type="file" id="csv-in" accept=".csv,text/csv,text/plain" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+      <button class="btn" id="csv-out">CSVを書き出す</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="csv-del"> 読み込むCSVに無い単語を削除する</label>
+    <p class="note">1行目をヘッダとして読み、英単語の列（word／英単語／単語）と意味の列（meaning／意味／語義／訳）を名前で探します。番号の列（id／no／番号）があれば使い、無ければ行の順に振ります。それ以外の列は無視します。文字コードはUTF-8。書き出した5列のCSVもそのまま読み込めます。</p>
+    <p class="note hide" id="csv-hint">下の欄に書き出しました。ファイルとして保存されなかった場合は、この欄を選んでコピーしてください。Artifactとして開いているときは、ブラウザの安全機能でファイル保存が働きません。単体のHTMLファイルとして開けばファイルで保存されます。</p>
+    <textarea id="csv-text" class="hide" readonly rows="8" aria-label="書き出したCSV"></textarea>
+    <div class="linkbar"><button id="btn-sample">同梱の1712語に戻す</button></div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <div class="pal" id="pal-seg" role="group" aria-label="配色">
+      <button data-pal="default" aria-label="標準" title="標準" aria-pressed="true"><span class="sw"><i style="background:#0c6b58"></i><i style="background:#f3f6f4"></i><i style="background:#0b1211"></i></span></button>
+      <button data-pal="konmari" aria-label="こんまり" title="こんまり" aria-pressed="false"><span class="sw"><i style="background:#7e7267"></i><i style="background:#f0e9de"></i><i style="background:#a67f6d"></i></span></button>
+      <button data-pal="mono" aria-label="モノクロ" title="モノクロ" aria-pressed="false"><span class="sw"><i style="background:#ffffff"></i><i style="background:#000000"></i><i style="background:#bdbdbd"></i></span></button>
+      <button data-pal="orange" aria-label="オランジュ" title="オランジュ" aria-pressed="false"><span class="sw"><i style="background:#f07300"></i><i style="background:#14100c"></i><i style="background:#d9a441"></i></span></button>
+      <button data-pal="monogram" aria-label="モノグラム" title="モノグラム" aria-pressed="false"><span class="sw"><i style="background:#c9a227"></i><i style="background:#17110b"></i><i style="background:#b5713f"></i></span></button>
+      <button data-pal="paper" aria-label="ペーパー" title="ペーパー" aria-pressed="false"><span class="sw"><i style="background:#1f3f8f"></i><i style="background:#ffffff"></i><i style="background:#9b2f2f"></i></span></button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <h2>直近7日の新規暗記数</h2>
+    <div class="week" id="week"></div>
+  </div>
+
+  <div class="linkbar">
+    <button id="btn-tts-test">発音をテスト（hello と鳴ります）</button>
+    <button id="btn-reset">進捗をすべてリセット</button>
+  </div>
+  <p class="note" id="tts-status" style="margin-top:10px"></p>
+  <p class="note" style="margin-top:26px">進捗はこの端末のブラウザ内にだけ保存されます。</p>
+  <p class="ver">Ver. 2026-08-30 00:07</p>
+</div>
+
+<!-- ================= S2 再生 ================= -->
+<div class="player hide" id="s2">
+  <div class="p-top">
+    <div class="pos"><b id="p-pos">0</b> / <span id="p-total">0</span><span style="margin-left:14px" id="p-time">0.0s</span></div>
+    <div class="tbtns">
+      <button class="ctl" id="btn-pause">一時停止</button>
+      <button class="ctl warn" id="btn-home2">ホーム</button>
+    </div>
+  </div>
+
+  <div class="taplayer" id="taplayer" role="button" tabindex="0" aria-label="覚えた単語をマークする"></div>
+
+  <div class="stage">
+    <div class="word" id="p-word">—</div>
+    <div class="meaning" id="p-meaning"></div>
+    <div class="badge hide" id="p-badge">暗記済</div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="actionbar">
+    <div class="arow center">
+      <button class="ctl mark" id="btn-mark">覚えた</button>
+    </div>
+    <div class="arow hide" id="row-pause1">
+      <button class="ctl" id="pb-prev">← 前へ</button>
+      <button class="ctl" id="pb-next">次へ →</button>
+    </div>
+  </div>
+
+  <div class="setbar" id="setbar">
+    <div class="srow top">
+      <button class="ctl sm" id="btn-detail" aria-expanded="false">詳細 ▾</button>
+      <span class="condline" id="cond-line"></span>
+    </div>
+    <div id="detail" class="closed">
+      <div class="srow">
+        <div class="seg2" id="seg-run" role="group" aria-label="送り方">
+          <button data-run="auto" aria-pressed="true">自動再生</button>
+          <button data-run="manual" aria-pressed="false">手動送り</button>
+        </div>
+      </div>
+      <div class="srow">
+        <div class="seg2" id="seg-mode" role="group" aria-label="表示モード">
+          <button data-mode="M1" aria-pressed="true">語義同時</button>
+          <button data-mode="M2" aria-pressed="false">語義遅延</button>
+          <button data-mode="M3" aria-pressed="false">単語のみ</button>
+        </div>
+      </div>
+      <div class="srow">
+        <div class="seg2" id="seg-speak" role="group" aria-label="発音">
+          <button data-speak="off" aria-pressed="false">発音オフ</button>
+          <button data-speak="flow" aria-pressed="true">流す</button>
+          <button data-speak="wait" aria-pressed="false">言い切る</button>
+        </div>
+      </div>
+      <div class="na hide" id="speak-na">この環境では音声合成が見つかりません。切り替えは残してあるので、鳴るかどうかは実際に試してください。</div>
+      <div class="slid" id="int-row">
+        <label for="sl-int">間隔</label>
+        <input type="range" id="sl-int" min="1" max="30" step="1" value="5">
+        <span class="v" id="sl-int-v">0.50 s</span>
+      </div>
+      <div class="slid" id="mdelay-row">
+        <label for="sl-mdelay">語義遅延</label>
+        <input type="range" id="sl-mdelay" min="0" max="30" step="1" value="3">
+        <span class="v" id="sl-mdelay-v">0.30 s</span>
+      </div>
+      <div class="slid" id="rate-row">
+        <label for="sl-rate">話速</label>
+        <input type="range" id="sl-rate" min="5" max="30" step="1" value="10">
+        <span class="v" id="sl-rate-v">1.0x</span>
+      </div>
+      <div class="slid" id="lag-row">
+        <label for="sl-lag">遅延補正</label>
+        <input type="range" id="sl-lag" min="0" max="1000" step="100" value="300">
+        <span class="v" id="sl-lag-v">300 ms</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= S3 結果 ================= -->
+<div class="wrap hide" id="s3">
+  <header class="top">
+    <p class="eyebrow">Session result</p>
+    <h1>セッション結果</h1>
+    <p class="sub" id="res-cond"></p>
+  </header>
+
+  <div class="res-grid">
+    <div class="stat"><div class="k">表示枚数</div><div class="v" id="r-shown">0</div></div>
+    <div class="stat"><div class="k">マーク数</div><div class="v" id="r-marked">0</div></div>
+    <div class="stat"><div class="k">所要時間</div><div class="v" id="r-time">0s</div></div>
+    <div class="stat"><div class="k">戻った回数</div><div class="v" id="r-rewind">0</div></div>
+  </div>
+
+  <h2 style="margin-bottom:8px">このセッションでマークした単語</h2>
+  <p class="note" style="margin:0 0 12px">誤ってマークしたものは「解除」で戻せます。</p>
+  <div class="mlist" id="r-list"></div>
+
+  <div class="row" style="margin-top:22px">
+    <button class="btn primary" id="btn-again" style="flex:1">もう一周</button>
+    <button class="btn" id="btn-home" style="flex:1">ホーム</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------------- 同梱の単語データ（共通単語1712語） ----------------
+   CSVのまま持ち、読み込み時に配列へ組み立てる。CSVを読み込めば差し替わる。 */
+const SAMPLE_CSV = `no,word,pos,meaning,level
+1,able,adj.,～できる,1
+2,across,prep.,～を横切って,1
+3,act,v.,行動する,1
+4,action,n.,行動,1
+5,add,v.,加える,1
+6,afraid of,adj.,恐れて,1
+7,age,n.,年齢・時代,1
+8,agree with,v.,(人に)同意する,1
+9,ahead,adv.,前方に,1
+10,almost,adv.,ほとんど,1
+11,alone,adv.,ひとりで,1
+12,along,prep.,～に沿って,1
+13,already,adv.,すでに,1
+14,although,conj.,～だけれども,1
+15,among,prep.,～の間で,1
+16,angry,adj.,怒った,1
+17,another,adj.,もう一つの,1
+18,answer,v.,答える,1
+19,art,n.,芸術,1
+20,ask,v.,尋ねる・頼む,1
+21,asleep,adj.,眠って,1
+22,attack,v.,攻撃する,1
+23,beauty,n.,美しさ,1
+24,become,v.,～になる,1
+25,begin,v.,始める,1
+26,behind,prep.,～の後ろに,1
+27,believe,v.,信じる,1
+28,below,prep.,～の下に,1
+29,beside,prep.,～のそばに,1
+30,between,prep.,～の間に,1
+31,blood,n.,血,1
+32,bone,n.,骨,1
+33,borrow,v.,借りる,1
+34,bottom,n.,底,1
+35,brain,n.,脳,1
+36,brave,adj.,勇敢な,1
+37,break,v.,壊す,1
+38,breath,n.,息,1
+39,breathe,v.,呼吸する,1
+40,bright,adj.,明るい・賢い,1
+41,bring,v.,持ってくる,1
+42,build,v.,建てる,1
+43,burn,v.,燃やす,1
+44,business,n.,事業・商売,1
+45,busy,adj.,忙しい,1
+46,buy,v.,買う,1
+47,care about,v.,気にかける,1
+48,careful,adj.,注意深い,1
+49,carry,v.,運ぶ,1
+50,catch,v.,捕まえる,1
+51,center,n.,中心,1
+52,century,n.,世紀,1
+53,change,v.,変える,1
+54,character,n.,性格・登場人物,1
+55,cheap,adj.,安い,1
+56,check,v.,確認する,1
+57,choice,n.,選択,1
+58,choose,v.,選ぶ,1
+59,circle,n.,円,1
+60,class,n.,授業・階級,1
+61,clean,v.,掃除する,1
+62,clear,adj.,明らかな,1
+63,clever,adj.,賢い,1
+64,climb,v.,登る,1
+65,close,v.,閉じる,1
+66,clothes,n.,衣服,1
+67,cloud,n.,雲,1
+68,collect,v.,集める,1
+69,college,n.,大学,1
+70,company,n.,会社・仲間,1
+71,continue,v.,続ける,1
+72,control,v.,管理する,1
+73,cook,v.,料理する,1
+74,copy,v.,写す,1
+75,corner,n.,角,1
+76,correct,adj.,正しい,1
+77,cost,v.,費用がかかる,1
+78,count,v.,数える・重要である,1
+79,country,n.,国・田舎,1
+80,couple,n.,二つ・夫婦,1
+81,course,n.,進路・科目,1
+82,cover,v.,覆う・報道する,1
+83,create,v.,創造する,1
+84,cross,v.,横切る,1
+85,crowd,n.,群衆,1
+86,culture,n.,文化,1
+87,cut,v.,切る,1
+88,danger,n.,危険,1
+89,dangerous,adj.,危険な,1
+90,dark,adj.,暗い,1
+91,death,n.,死,1
+92,decide,v.,決める,1
+93,decision,n.,決定,1
+94,deep,adj.,深い,1
+95,die,v.,死ぬ,1
+96,difficult,adj.,難しい,1
+97,direction,n.,方向・指示,1
+98,discover,v.,発見する,1
+99,dish,n.,料理・皿,1
+100,distance,n.,距離,1
+101,draw,v.,描く・引く,1
+102,dream,n.,夢,1
+103,dress,v.,服を着せる,1
+104,drive,v.,運転する・駆り立てる,1
+105,drop,v.,落とす,1
+106,dry,adj.,乾いた,1
+107,early,adj.,早い,1
+108,earth,n.,地球・土,1
+109,east,n.,東,1
+110,easy,adj.,簡単な,1
+111,else,adv.,ほかに,1
+112,enjoy,v.,楽しむ,1
+113,enough,adj.,十分な,1
+114,enter,v.,入る,1
+115,example,n.,例,1
+116,excited,adj.,興奮した,1
+117,exciting,adj.,わくわくさせる,1
+118,exercise,n.,運動・練習,1
+119,expensive,adj.,高価な,1
+120,experience,n.,経験,1
+121,explain,v.,説明する,1
+122,face,v.,直面する,1
+123,fact,n.,事実,1
+124,fall,v.,落ちる,1
+125,famous,adj.,有名な,1
+126,far,adv.,遠くに,1
+127,farm,n.,農場,1
+128,fast,adj.,速い,1
+129,favorite,adj.,お気に入りの,1
+130,feel,v.,感じる,1
+131,feeling,n.,感情,1
+132,fight,v.,戦う,1
+133,fill,v.,満たす,1
+134,find,v.,見つける,1
+135,fine,adj.,元気な・見事な,1
+136,finish,v.,終える,1
+137,floor,n.,床・階,1
+138,follow,v.,従う・後を追う,1
+139,foreign,adj.,外国の,1
+140,forest,n.,森,1
+141,forget,v.,忘れる,1
+142,free,adj.,自由な・無料の,1
+143,fresh,adj.,新鮮な,1
+144,friendly,adj.,親しみやすい,1
+145,front,n.,前面,1
+146,fruit,n.,果物,1
+147,full,adj.,いっぱいの,1
+148,fun,n.,楽しみ,1
+149,funny,adj.,おかしい,1
+150,future,n.,未来,1
+151,garden,n.,庭,1
+152,gift,n.,贈り物・才能,1
+153,glad,adj.,うれしい,1
+154,goal,n.,目標,1
+155,great,adj.,偉大な・すばらしい,1
+156,ground,n.,地面,1
+157,group,n.,集団,1
+158,grow,v.,成長する・育てる,1
+159,guess,v.,推測する,1
+160,happen,v.,起こる,1
+161,hard,adj.,固い・難しい,1
+162,hate,v.,憎む,1
+163,health,n.,健康,1
+164,healthy,adj.,健康な,1
+165,hear,v.,聞こえる,1
+166,heart,n.,心臓・心,1
+167,heavy,adj.,重い,1
+168,help,v.,助ける,1
+169,high,adj.,高い,1
+170,history,n.,歴史,1
+171,hit,v.,打つ,1
+172,hold,v.,持つ・開催する,1
+173,hole,n.,穴,1
+174,holiday,n.,休日,1
+175,home,n.,家庭,1
+176,hope,v.,望む,1
+177,human,n.,人間,1
+178,hurry,v.,急ぐ,1
+179,hurt,v.,傷つける,1
+180,idea,n.,考え,1
+181,important,adj.,重要な,1
+182,information,n.,情報,1
+183,interest,n.,興味・利子,1
+184,interested in,adj.,～に興味がある,1
+185,interesting,adj.,興味深い,1
+186,introduce,v.,紹介する・導入する,1
+187,invite,v.,招待する,1
+188,job,n.,仕事,1
+189,join,v.,参加する,1
+190,jump,v.,跳ぶ,1
+191,keep,v.,保つ,1
+192,key,n.,鍵・要点,1
+193,kill,v.,殺す,1
+194,kind,adj.,親切な,1
+195,knock,v.,ノックする,1
+196,land,n.,土地,1
+197,language,n.,言語,1
+198,large,adj.,大きい,1
+199,late,adj.,遅い,1
+200,laugh,v.,笑う,1
+201,leader,n.,指導者,1
+202,leaf,n.,葉,1
+203,learn,v.,学ぶ,1
+204,least,adj.,最も少ない,1
+205,leave,v.,去る・残す,1
+206,less,adj.,より少ない,1
+207,lesson,n.,授業・教訓,1
+208,let,v.,～させる,1
+209,level,n.,水準,1
+210,library,n.,図書館,1
+211,life,n.,生命・生活,1
+212,light,n.,光,1
+213,line,n.,線・列,1
+214,list,n.,一覧,1
+215,listen,v.,聞く,1
+216,little,adj.,小さい・少ない,1
+217,live,v.,住む・生きる,1
+218,lock,v.,鍵をかける,1
+219,long,adj.,長い,1
+220,look,v.,見る,1
+221,lose,v.,失う・負ける,1
+222,loud,adj.,大きな音の,1
+223,love,v.,愛する,1
+224,low,adj.,低い,1
+225,luck,n.,運,1
+226,lucky,adj.,幸運な,1
+227,machine,n.,機械,1
+228,magazine,n.,雑誌,1
+229,main,adj.,主な,1
+230,make,v.,作る,1
+231,many,adj.,多くの,1
+232,map,n.,地図,1
+233,marry,v.,結婚する,1
+234,mathematics,n.,数学,1
+235,maybe,adv.,たぶん,1
+236,meal,n.,食事,1
+237,mean,v.,意味する,1
+238,meaning,n.,意味,1
+239,meet,v.,会う,1
+240,meeting,n.,会議,1
+241,member,n.,一員,1
+242,memory,n.,記憶,1
+243,message,n.,伝言,1
+244,middle,n.,中央,1
+245,might,v.,～かもしれない,1
+246,million,n.,100万,1
+247,mind,n.,心・知性,1
+248,minute,n.,分,1
+249,miss,v.,逃す・恋しく思う,1
+250,mistake,n.,誤り,1
+251,mix,v.,混ぜる,1
+252,model,n.,模型・手本,1
+253,moment,n.,瞬間,1
+254,money,n.,お金,1
+255,most,adj.,最も多い,1
+256,move,v.,動く・引っ越す,1
+257,museum,n.,博物館,1
+258,music,n.,音楽,1
+259,must,v.,～しなければならない,1
+260,natural,adj.,自然の,1
+261,nature,n.,自然・性質,1
+262,need,v.,必要とする,1
+263,neighbor,n.,隣人,1
+264,never,adv.,決して～ない,1
+265,news,n.,知らせ,1
+266,newspaper,n.,新聞,1
+267,next,adj.,次の,1
+268,nice,adj.,すてきな,1
+269,noise,n.,騒音,1
+270,noisy,adj.,騒がしい,1
+271,north,n.,北,1
+272,number,n.,数,1
+273,nurse,n.,看護師,1
+274,ocean,n.,海洋,1
+275,office,n.,事務所,1
+276,often,adv.,しばしば,1
+277,oil,n.,石油・油,1
+278,once,adv.,かつて・一度,1
+279,only,adj.,唯一の,1
+280,open,v.,開く,1
+281,opinion,n.,意見,1
+282,order,n.,命令・注文・順序,1
+283,other,adj.,他の,1
+284,own,v.,所有する,1
+285,page,n.,ページ,1
+286,pain,n.,痛み,1
+287,paint,v.,塗る・描く,1
+288,pair,n.,一対,1
+289,paper,n.,紙・論文,1
+290,parent,n.,親,1
+291,park,n.,公園,1
+292,part,n.,部分,1
+293,party,n.,会・政党,1
+294,pass,v.,通る・合格する,1
+295,past,n.,過去,1
+296,pay,v.,支払う,1
+297,peace,n.,平和,1
+298,people,n.,人々,1
+299,percent,n.,パーセント,1
+300,perfect,adj.,完全な,1
+301,person,n.,人,1
+302,photograph,n.,写真,1
+303,pick,v.,選ぶ・摘む,1
+304,picture,n.,絵・写真,1
+305,piece,n.,一片,1
+306,place,n.,場所,1
+307,plan,n.,計画,1
+308,plant,n.,植物・工場,1
+309,plastic,n.,プラスチック,1
+310,play,v.,遊ぶ・演じる,1
+311,please,v.,喜ばせる,1
+312,point,n.,点・要点,1
+313,poor,adj.,貧しい・下手な,1
+314,popular,adj.,人気のある,1
+315,possible,adj.,可能な,1
+316,power,n.,力,1
+317,practice,n.,練習・実践,1
+318,price,n.,価格,1
+319,print,v.,印刷する,1
+320,prize,n.,賞,1
+321,problem,n.,問題,1
+322,program,n.,計画・番組,1
+323,promise,v.,約束する,1
+324,pull,v.,引く,1
+325,push,v.,押す,1
+326,put,v.,置く,1
+327,question,n.,質問,1
+328,quick,adj.,素早い,1
+329,quiet,adj.,静かな,1
+330,quite,adv.,かなり,1
+331,race,n.,競走・人種,1
+332,reach,v.,到着する・届く,1
+333,read,v.,読む,1
+334,ready for,adj.,～の用意ができて,1
+335,real,adj.,本当の,1
+336,reason,n.,理由,1
+337,receive,v.,受け取る,1
+338,record,v.,記録する,1
+339,relax,v.,くつろぐ,1
+340,remember,v.,覚えている,1
+341,repeat,v.,繰り返す,1
+342,report,n.,報告,1
+343,rest,n.,休息・残り,1
+344,result,n.,結果,1
+345,return,v.,戻る・返す,1
+346,rich,adj.,豊かな,1
+347,ride,v.,乗る,1
+348,right,n.,権利,1
+349,ring,v.,鳴る,1
+350,river,n.,川,1
+351,road,n.,道路,1
+352,rock,n.,岩,1
+353,roof,n.,屋根,1
+354,room,n.,部屋・余地,1
+355,round,adj.,丸い,1
+356,rule,n.,規則,1
+357,run,v.,走る・経営する,1
+358,safe,adj.,安全な,1
+359,sale,n.,販売,1
+360,same,adj.,同じ,1
+361,save,v.,救う・節約する,1
+362,school,n.,学校,1
+363,science,n.,科学,1
+364,scientist,n.,科学者,1
+365,score,n.,得点,1
+366,sea,n.,海,1
+367,season,n.,季節,1
+368,seat,n.,座席,1
+369,second,n.,秒,1
+370,secret,n.,秘密,1
+371,see,v.,見る・会う,1
+372,sell,v.,売る,1
+373,send,v.,送る,1
+374,sentence,n.,文・判決,1
+375,service,n.,奉仕・業務,1
+376,set,v.,置く・設定する,1
+377,several,adj.,いくつかの,1
+378,shall,v.,～しましょうか,1
+379,shape,n.,形,1
+380,ship,n.,船,1
+381,shop,n.,店,1
+382,short,adj.,短い,1
+383,should,v.,～すべきだ,1
+384,shoulder,n.,肩,1
+385,shout,v.,叫ぶ,1
+386,show,v.,見せる,1
+387,shower,n.,シャワー・にわか雨,1
+388,sick,adj.,病気の,1
+389,side,n.,側,1
+390,simple,adj.,単純な,1
+391,since,conj.,～以来・～なので,1
+392,sing,v.,歌う,1
+393,sit,v.,座る,1
+394,size,n.,大きさ,1
+395,skin,n.,肌,1
+396,sky,n.,空,1
+397,sleep,v.,眠る,1
+398,slow,adj.,遅い,1
+399,small,adj.,小さい,1
+400,smart,adj.,賢い,1
+401,smell,v.,においがする,1
+402,smile,v.,ほほえむ,1
+403,smoke,v.,喫煙する,1
+404,snow,n.,雪,1
+405,so,adv.,そのように・とても,1
+406,soft,adj.,柔らかい,1
+407,sometimes,adv.,ときどき,1
+408,soon,adv.,まもなく,1
+409,sorry,adj.,すまなく思う,1
+410,sound,n.,音,1
+411,south,n.,南,1
+412,space,n.,空間・宇宙,1
+413,speak,v.,話す,1
+414,special,adj.,特別な,1
+415,speech,n.,演説,1
+416,speed,n.,速度,1
+417,spell,v.,つづる,1
+418,spend,v.,費やす,1
+419,spring,n.,春・泉・ばね,1
+420,square,n.,正方形・広場,1
+421,stair,n.,階段,1
+422,stand,v.,立つ・我慢する,1
+423,star,n.,星,1
+424,start,v.,始める,1
+425,station,n.,駅,1
+426,stay,v.,滞在する,1
+427,step,n.,段階・歩み,1
+428,still,adv.,まだ,1
+429,stone,n.,石,1
+430,stop,v.,止める,1
+431,store,n.,店,1
+432,story,n.,物語,1
+433,straight,adj.,まっすぐな,1
+434,strange,adj.,奇妙な,1
+435,street,n.,通り,1
+436,strong,adj.,強い,1
+437,student,n.,生徒,1
+438,study,v.,勉強する,1
+439,subject,n.,科目・主題,1
+440,success,n.,成功,1
+441,such,adj.,そのような,1
+442,sure,adj.,確信して,1
+443,surprise,v.,驚かせる,1
+444,swim,v.,泳ぐ,1
+445,system,n.,体系・制度,1
+446,table,n.,テーブル・表,1
+447,tail,n.,尾,1
+448,take,v.,取る・連れて行く,1
+449,talk,v.,話す,1
+450,tall,adj.,背が高い,1
+451,taste,n.,味・好み,1
+452,teach,v.,教える,1
+453,team,n.,チーム,1
+454,telephone,n.,電話,1
+455,tell,v.,話す・伝える,1
+456,test,n.,試験,1
+457,than,conj.,～よりも,1
+458,thank,v.,感謝する,1
+459,thing,n.,物・事,1
+460,think,v.,考える,1
+461,thirsty,adj.,のどが渇いた,1
+462,thought,n.,考え,1
+463,through,prep.,～を通って,1
+464,throw,v.,投げる,1
+465,ticket,n.,切符,1
+466,time,n.,時間・回,1
+467,tired,adj.,疲れた,1
+468,title,n.,題名,1
+469,today,n.,今日,1
+470,together,adv.,一緒に,1
+471,tomorrow,n.,明日,1
+472,tonight,n.,今夜,1
+473,tool,n.,道具,1
+474,top,n.,頂上,1
+475,topic,n.,話題,1
+476,touch,v.,触れる,1
+477,tour,n.,旅行,1
+478,tourist,n.,観光客,1
+479,towel,n.,タオル,1
+480,tower,n.,塔,1
+481,town,n.,町,1
+482,toy,n.,おもちゃ,1
+483,train,v.,訓練する,1
+484,travel,v.,旅行する,1
+485,tree,n.,木,1
+486,trip,n.,旅行,1
+487,trouble,n.,困難,1
+488,truck,n.,トラック,1
+489,true,adj.,本当の,1
+490,truth,n.,真実,1
+491,try,v.,試す,1
+492,turn,v.,回る・曲がる,1
+493,twice,adv.,2回,1
+494,type,n.,型・種類,1
+495,under,prep.,～の下に,1
+496,understand,v.,理解する,1
+497,uniform,n.,制服,1
+498,university,n.,大学,1
+499,until,prep.,～まで,1
+500,useful,adj.,役に立つ,1
+501,user,n.,利用者,1
+502,usual,adj.,いつもの,1
+503,usually,adv.,たいてい,1
+504,vacation,n.,休暇,1
+505,vegetable,n.,野菜,1
+506,village,n.,村,1
+507,visit,v.,訪れる,1
+508,visitor,n.,訪問者,1
+509,voice,n.,声,1
+510,volunteer,n.,志願者,1
+511,wait for,v.,～を待つ,1
+512,wake,v.,目覚める,1
+513,walk,v.,歩く,1
+514,wall,n.,壁,1
+515,want,v.,欲する,1
+516,war,n.,戦争,1
+517,warm,adj.,暖かい,1
+518,wash,v.,洗う,1
+519,watch,v.,見守る,1
+520,water,n.,水,1
+521,wave,n.,波,1
+522,way,n.,道・方法,1
+523,weak,adj.,弱い,1
+524,wear,v.,身につけている,1
+525,weather,n.,天気,1
+526,website,n.,ウェブサイト,1
+527,week,n.,週,1
+528,weight,n.,重さ,1
+529,welcome,v.,歓迎する,1
+530,well,adv.,上手に,1
+531,west,n.,西,1
+532,wet,adj.,ぬれた,1
+533,while,conj.,～する間・～だが,1
+534,whole,adj.,全体の,1
+535,wide,adj.,広い,1
+536,wild,adj.,野生の,1
+537,win,v.,勝つ,1
+538,wind,n.,風,1
+539,window,n.,窓,1
+540,wing,n.,翼,1
+541,winner,n.,勝者,1
+542,wish,v.,願う,1
+543,without,prep.,～なしで,1
+544,wonderful,adj.,すばらしい,1
+545,wood,n.,木材,1
+546,word,n.,語,1
+547,work,v.,働く・機能する,1
+548,world,n.,世界,1
+549,worry about,v.,～を心配する,1
+550,worse,adj.,より悪い,1
+551,write,v.,書く,1
+552,wrong,adj.,間違った,1
+553,year,n.,年,1
+554,yet,adv.,まだ・すでに,1
+555,young,adj.,若い,1
+556,accept,v.,受け入れる,2
+557,activity,n.,活動,2
+558,actually,adv.,実際は,2
+559,advice,n.,助言,2
+560,against,prep.,～に反対して,2
+561,agree on,v.,(～について)合意する,2
+562,agree to,v.,(提案などに)同意する,2
+563,aim at,v.,目指す,2
+564,alive,adj.,生きている,2
+565,allow,v.,許す,2
+566,aloud,adv.,声に出して,2
+567,amazing,adj.,驚くべき,2
+568,amount,n.,量,2
+569,anger,n.,怒り,2
+570,apologize for,v.,謝る,2
+571,appear,v.,現れる・～に見える,2
+572,area,n.,地域・面積,2
+573,article,n.,記事,2
+574,attend,v.,出席する,2
+575,audience,n.,聴衆,2
+576,author,n.,著者,2
+577,available,adj.,利用できる,2
+578,average,n.,平均,2
+579,avoid,v.,避ける,2
+580,background,n.,背景,2
+581,balance,n.,均衡,2
+582,basic,adj.,基本的な,2
+583,benefit,n.,利益,2
+584,besides,adv.,その上,2
+585,bill,n.,請求書・法案,2
+586,birth,n.,誕生,2
+587,blame,v.,〈A for B〉非難する,2
+588,block,v.,ふさぐ,2
+589,board,n.,板・委員会,2
+590,boil,v.,沸騰させる,2
+591,boring,adj.,退屈な,2
+592,bother,v.,悩ませる,2
+593,branch,n.,枝・支店,2
+594,care for,v.,～の世話をする・～を好む,2
+595,case,n.,場合・事件,2
+596,cause,v.,引き起こす,2
+597,celebrate,v.,祝う,2
+598,certain,adj.,確かな・ある,2
+599,certainly,adv.,確かに,2
+600,chance,n.,機会・可能性,2
+601,charge,v.,〈A for B〉請求する,2
+602,cheer up,v.,元気づける,2
+603,citizen,n.,市民,2
+604,climate,n.,気候,2
+605,cloth,n.,布,2
+606,coast,n.,海岸,2
+607,comfortable,adj.,快適な,2
+608,comment,n.,論評,2
+609,common,adj.,共通の・普通の,2
+610,complete,adj.,完全な,2
+611,condition,n.,状態・条件,2
+612,contact,v.,連絡する,2
+613,contain,v.,含む,2
+614,content,n.,内容,2
+615,convenient,adj.,便利な,2
+616,conversation,n.,会話,2
+617,courage,n.,勇気,2
+618,crash,v.,衝突する,2
+619,creature,n.,生き物,2
+620,crime,n.,犯罪,2
+621,custom,n.,習慣,2
+622,customer,n.,顧客,2
+623,damage,n.,損害,2
+624,data,n.,データ,2
+625,degree,n.,程度・学位,2
+626,deliver,v.,配達する,2
+627,describe,v.,描写する,2
+628,design,v.,設計する,2
+629,detail,n.,詳細,2
+630,develop,v.,発展させる,2
+631,direct,adj.,直接の,2
+632,disappear,v.,見えなくなる,2
+633,disappoint,v.,失望させる,2
+634,discuss,v.,議論する,2
+635,disease,n.,病気,2
+636,display,v.,展示する,2
+637,divide,v.,分ける,2
+638,document,n.,文書,2
+639,double,adj.,2倍の,2
+640,dozen,n.,1ダース,2
+641,drama,n.,演劇,2
+642,drug,n.,薬・麻薬,2
+643,easily,adv.,容易に,2
+644,education,n.,教育,2
+645,either,adv.,どちらか,2
+646,electric,adj.,電気の,2
+647,electricity,n.,電気,2
+648,empty,adj.,空の,2
+649,enemy,n.,敵,2
+650,energy,n.,エネルギー,2
+651,engine,n.,エンジン,2
+652,engineer,n.,技術者,2
+653,entrance,n.,入口,2
+654,environment,n.,環境,2
+655,error,n.,誤り,2
+656,especially,adv.,特に,2
+657,event,n.,出来事・行事,2
+658,excellent,adj.,優れた,2
+659,excuse,n.,言い訳,2
+660,expect,v.,予期する,2
+661,experiment,n.,実験,2
+662,express,v.,表現する,2
+663,extra,adj.,追加の,2
+664,factory,n.,工場,2
+665,fail,v.,失敗する,2
+666,fashion,n.,流行・服装,2
+667,fear,n.,恐れ,2
+668,feed,v.,えさを与える,2
+669,field,n.,野原・分野,2
+670,final,adj.,最終の,2
+671,finally,adv.,ついに,2
+672,fit,v.,合う,2
+673,fix,v.,修理する・固定する,2
+674,flight,n.,飛行・便,2
+675,forever,adv.,永遠に,2
+676,form,n.,形・用紙,2
+677,forward,adv.,前方へ,2
+678,freedom,n.,自由,2
+679,freeze,v.,凍る,2
+680,furniture,n.,家具,2
+681,garbage,n.,ごみ,2
+682,gas,n.,気体・ガソリン,2
+683,gather,v.,集める,2
+684,gentle,adj.,穏やかな,2
+685,government,n.,政府,2
+686,grade,n.,成績・学年,2
+687,greet,v.,あいさつする,2
+688,grocery,n.,食料品,2
+689,guest,n.,客,2
+690,guide,v.,案内する,2
+691,habit,n.,習慣,2
+692,hang,v.,掛ける,2
+693,heat,n.,熱,2
+694,height,n.,高さ,2
+695,hide,v.,隠す,2
+696,honest,adj.,正直な,2
+697,however,adv.,しかしながら,2
+698,huge,adj.,巨大な,2
+699,humor,n.,ユーモア,2
+700,hunger,n.,飢え,2
+701,hunt,v.,狩る,2
+702,ill,adj.,病気の,2
+703,illness,n.,病気,2
+704,image,n.,像・印象,2
+705,imagination,n.,想像力,2
+706,imagine,v.,想像する,2
+707,importance,n.,重要性,2
+708,impossible,adj.,不可能な,2
+709,improve,v.,改善する,2
+710,include,v.,含む,2
+711,increase,v.,増加する,2
+712,insect,n.,昆虫,2
+713,instead of,prep.,～の代わりに,2
+714,international,adj.,国際的な,2
+715,interview,n.,面接・取材,2
+716,invent,v.,発明する,2
+717,invention,n.,発明,2
+718,invitation,n.,招待,2
+719,item,n.,品目,2
+720,journey,n.,旅,2
+721,joy,n.,喜び,2
+722,judge,v.,判断する,2
+723,kindergarten,n.,幼稚園,2
+724,knowledge,n.,知識,2
+725,last,v.,続く,2
+726,law,n.,法律,2
+727,lazy,adj.,怠惰な,2
+728,lend,v.,貸す,2
+729,length,n.,長さ,2
+730,lie,v.,横たわる・うそをつく,2
+731,lift,v.,持ち上げる,2
+732,limit,v.,制限する,2
+733,local,adj.,地元の,2
+734,lonely,adj.,孤独な,2
+735,mainly,adv.,主に,2
+736,manager,n.,管理者,2
+737,mark,v.,印をつける,2
+738,market,n.,市場,2
+739,marriage,n.,結婚,2
+740,match,v.,合う,2
+741,material,n.,材料,2
+742,matter,v.,重要である,2
+743,medical,adj.,医学の,2
+744,medicine,n.,薬・医学,2
+745,melt,v.,溶ける,2
+746,metal,n.,金属,2
+747,modern,adj.,現代の,2
+748,movement,n.,運動,2
+749,mystery,n.,神秘・推理,2
+750,narrow,adj.,狭い,2
+751,national,adj.,国家の,2
+752,nearby,adj.,近くの,2
+753,nearly,adv.,ほとんど,2
+754,necessary,adj.,必要な,2
+755,nervous,adj.,緊張した,2
+756,none,pron.,一つも～ない,2
+757,normal,adj.,正常な,2
+758,note,v.,書き留める・気づく,2
+759,notice,v.,気づく,2
+760,novel,n.,小説,2
+761,object,n.,物・目的,2
+762,offer,v.,申し出る・提供する,2
+763,officer,n.,役人・将校,2
+764,organize,v.,組織する,2
+765,outdoor,adj.,屋外の,2
+766,owner,n.,所有者,2
+767,pack,v.,荷造りする,2
+768,package,n.,小包,2
+769,palace,n.,宮殿,2
+770,partner,n.,仲間,2
+771,passenger,n.,乗客,2
+772,path,n.,小道,2
+773,patient,n.,患者,2
+774,pattern,n.,型・模様,2
+775,peaceful,adj.,平和な,2
+776,perhaps,adv.,おそらく,2
+777,period,n.,期間,2
+778,personal,adj.,個人の,2
+779,phrase,n.,句・表現,2
+780,planet,n.,惑星,2
+781,pleasant,adj.,心地よい,2
+782,pleasure,n.,喜び,2
+783,plus,prep.,～を加えて,2
+784,poem,n.,詩,2
+785,polite,adj.,礼儀正しい,2
+786,pollution,n.,汚染,2
+787,population,n.,人口,2
+788,port,n.,港,2
+789,position,n.,位置・立場,2
+790,post,v.,投稿する・投函する,2
+791,powerful,adj.,強力な,2
+792,pray,v.,祈る,2
+793,prefer,v.,～のほうを好む,2
+794,preparation,n.,準備,2
+795,prepare for,v.,～の準備をする,2
+796,present,v.,提示する・贈る,2
+797,president,n.,大統領・社長,2
+798,press,v.,押す,2
+799,private,adj.,私的な,2
+800,probably,adv.,おそらく,2
+801,produce,v.,生産する,2
+802,product,n.,製品,2
+803,professor,n.,教授,2
+804,project,n.,計画,2
+805,protect,v.,守る,2
+806,proud of,adj.,～を誇りに思う,2
+807,public,adj.,公共の,2
+808,purpose,n.,目的,2
+809,puzzle,n.,難問,2
+810,quality,n.,質,2
+811,quarter,n.,4分の1,2
+812,quit,v.,やめる,2
+813,raise,v.,上げる・育てる,2
+814,realize,v.,悟る・実現する,2
+815,recent,adj.,最近の,2
+816,recently,adv.,最近,2
+817,recipe,n.,調理法,2
+818,regular,adj.,規則的な,2
+819,regularly,adv.,定期的に,2
+820,relationship,n.,関係,2
+821,rent,v.,賃借りする,2
+822,repair,v.,修理する,2
+823,reply,v.,返答する,2
+824,request,n.,要請,2
+825,research,n.,研究,2
+826,respect,v.,尊敬する,2
+827,rise,v.,上がる,2
+828,risk,n.,危険,2
+829,role,n.,役割,2
+830,roll,v.,転がる,2
+831,root,n.,根,2
+832,row,n.,列,2
+833,rush,v.,急ぐ,2
+834,safety,n.,安全,2
+835,sail,v.,航海する,2
+836,sample,n.,見本,2
+837,scared,adj.,おびえた,2
+838,scene,n.,場面,2
+839,schedule,n.,予定表,2
+840,search for,v.,～を探す,2
+841,section,n.,部分,2
+842,seed,n.,種,2
+843,seem,v.,～のように思われる,2
+844,sense,n.,感覚・意味,2
+845,serious,adj.,深刻な・まじめな,2
+846,serve,v.,仕える・給仕する,2
+847,shake,v.,振る,2
+848,share,v.,共有する,2
+849,sharp,adj.,鋭い,2
+850,shelf,n.,棚,2
+851,shine,v.,輝く,2
+852,shock,v.,衝撃を与える,2
+853,shoot,v.,撃つ,2
+854,shut,v.,閉める,2
+855,shy,adj.,内気な,2
+856,sight,n.,視力・光景,2
+857,sign,n.,記号・兆候,2
+858,signal,n.,信号,2
+859,silent,adj.,静かな,2
+860,similar to,adj.,～に似ている,2
+861,simply,adv.,単に,2
+862,single,adj.,ただ一つの,2
+863,sink,v.,沈む,2
+864,situation,n.,状況,2
+865,skill,n.,技能,2
+866,slide,v.,滑る,2
+867,smooth,adj.,滑らかな,2
+868,social,adj.,社会の,2
+869,society,n.,社会,2
+870,software,n.,ソフトウェア,2
+871,soldier,n.,兵士,2
+872,solve,v.,解決する,2
+873,sort,n.,種類,2
+874,spirit,n.,精神,2
+875,staff,n.,職員,2
+876,stage,n.,舞台・段階,2
+877,state,n.,状態・州,2
+878,steal,v.,盗む,2
+879,steam,n.,蒸気,2
+880,stomach,n.,胃,2
+881,storm,n.,嵐,2
+882,stranger,n.,見知らぬ人,2
+883,stress,n.,圧力・強調,2
+884,string,n.,ひも,2
+885,stupid,adj.,愚かな,2
+886,style,n.,様式,2
+887,succeed in,v.,～に成功する,2
+888,successful,adj.,成功した,2
+889,sudden,adj.,突然の,2
+890,suggest,v.,提案する,2
+891,suit,v.,似合う,2
+892,support,v.,支える,2
+893,switch,v.,切り替える,2
+894,tag,n.,札,2
+895,task,n.,課題,2
+896,technology,n.,科学技術,2
+897,temperature,n.,温度,2
+898,terrible,adj.,ひどい,2
+899,text,n.,本文,2
+900,theater,n.,劇場,2
+901,thick,adj.,厚い,2
+902,thin,adj.,薄い,2
+903,though,conj.,～だけれども,2
+904,throat,n.,のど,2
+905,tight,adj.,きつい,2
+906,till,prep.,～まで,2
+907,tiny,adj.,ごく小さい,2
+908,tongue,n.,舌・言語,2
+909,total,adj.,全体の,2
+910,toward,prep.,～のほうへ,2
+911,track,n.,線路・跡,2
+912,tradition,n.,伝統,2
+913,traditional,adj.,伝統的な,2
+914,traffic,n.,交通,2
+915,translate,v.,翻訳する,2
+916,trash,n.,ごみ,2
+917,treasure,n.,宝物,2
+918,trust,v.,信頼する,2
+919,ugly,adj.,醜い,2
+920,unable,adj.,～できない,2
+921,uncomfortable,adj.,心地よくない,2
+922,unit,n.,単位,2
+923,unusual,adj.,普通でない,2
+924,valley,n.,谷,2
+925,value,n.,価値,2
+926,victory,n.,勝利,2
+927,view,n.,眺め・見解,2
+928,virus,n.,ウイルス,2
+929,vocabulary,n.,語彙,2
+930,waste,v.,浪費する,2
+931,weigh,v.,重さがある,2
+932,whale,n.,クジラ,2
+933,wheel,n.,車輪,2
+934,whether,conj.,～かどうか,2
+935,wise,adj.,賢い,2
+936,wonder,v.,不思議に思う,2
+937,yard,n.,庭・ヤード,2
+938,ability,n.,能力,3
+939,access to,n.,接近・利用する権利,3
+940,accident,n.,事故・偶然,3
+941,achieve,v.,達成する,3
+942,admit,v.,認める,3
+943,advantage,n.,利点,3
+944,advertisement,n.,広告,3
+945,affect,v.,影響を与える,3
+946,afford,v.,～する余裕がある,3
+947,agreement,n.,合意,3
+948,ancient,adj.,古代の,3
+949,announce,v.,発表する,3
+950,apologize to,v.,(人に)謝る,3
+951,apply for,v.,応募する,3
+952,argument,n.,議論・論拠,3
+953,arrange,v.,手配する・並べる,3
+954,arrive at,v.,(狭い場所に)到着する,3
+955,attention to,n.,注意,3
+956,attitude,n.,態度,3
+957,attract,v.,引きつける,3
+958,aware of,adj.,気づいて,3
+959,behavior,n.,行動,3
+960,belief in,n.,信念,3
+961,belong to,v.,属する,3
+962,beyond,prep.,～を越えて,3
+963,blind,adj.,目の見えない,3
+964,border,n.,国境,3
+965,broad,adj.,広い,3
+966,challenge,n.,課題・挑戦,3
+967,charity,n.,慈善,3
+968,cheer for,v.,～を応援する,3
+969,chemical,adj.,化学の,3
+970,classic,adj.,典型的な・古典的な,3
+971,code,n.,規則・暗号,3
+972,combine with,v.,組み合わさる,3
+973,communicate with,v.,意思を伝え合う,3
+974,community,n.,地域社会,3
+975,compare with,v.,比較する,3
+976,compete with,v.,競争する,3
+977,complain about,v.,不平を言う,3
+978,concern,n.,関心・懸念,3
+979,confidence,n.,自信,3
+980,connect with,v.,つながる,3
+981,consider,v.,よく考える・みなす,3
+982,consist of,v.,成り立つ,3
+983,crop,n.,作物,3
+984,cultural,adj.,文化の,3
+985,curious about,adj.,好奇心の強い,3
+986,deal with,v.,扱う,3
+987,debate,n.,討論,3
+988,decrease,v.,減少する,3
+989,defeat,v.,打ち負かす,3
+990,defend,v.,守る,3
+991,demand,v.,要求する,3
+992,depend on,v.,頼る・次第である,3
+993,desert,n.,砂漠,3
+994,desire,n.,欲望,3
+995,destroy,v.,破壊する,3
+996,development,n.,発達・開発,3
+997,device,n.,装置,3
+998,difference between,n.,違い,3
+999,disagree with,v.,意見が合わない,3
+1000,distant,adj.,遠い,3
+1001,disturb,v.,邪魔する,3
+1002,division,n.,分割・部門,3
+1003,donate,v.,寄付する,3
+1004,doubt,n.,疑い,3
+1005,drag,v.,引きずる,3
+1006,dramatic,adj.,劇的な,3
+1007,due to,prep.,～が原因で,3
+1008,duty,n.,義務,3
+1009,earn,v.,稼ぐ,3
+1010,economic,adj.,経済の,3
+1011,economy,n.,経済,3
+1012,edge,n.,端・優位,3
+1013,editor,n.,編集者,3
+1014,educate,v.,教育する,3
+1015,effect,n.,効果・影響,3
+1016,effective,adj.,効果的な,3
+1017,effort,n.,努力,3
+1018,elderly,adj.,年配の,3
+1019,elect,v.,選出する,3
+1020,electronic,adj.,電子の,3
+1021,element,n.,要素,3
+1022,embarrassed,adj.,恥ずかしい,3
+1023,emergency,n.,緊急事態,3
+1024,emotion,n.,感情,3
+1025,emotional,adj.,感情的な,3
+1026,employ,v.,雇う,3
+1027,employee,n.,従業員,3
+1028,employer,n.,雇用主,3
+1029,enable,v.,可能にする,3
+1030,encourage,v.,励ます・促す,3
+1031,entire,adj.,全体の,3
+1032,environmental,adj.,環境の,3
+1033,equal,adj.,等しい,3
+1034,equipment,n.,設備,3
+1035,escape,v.,逃げる,3
+1036,essential,adj.,不可欠な,3
+1037,evidence,n.,証拠,3
+1038,exact,adj.,正確な,3
+1039,examine,v.,調べる,3
+1040,except,prep.,～を除いて,3
+1041,exchange,v.,交換する,3
+1042,exist,v.,存在する,3
+1043,expert,n.,専門家,3
+1044,explanation,n.,説明,3
+1045,explore,v.,探検する・探究する,3
+1046,export,v.,輸出する,3
+1047,expression,n.,表現・表情,3
+1048,failure,n.,失敗,3
+1049,fair,adj.,公平な,3
+1050,false,adj.,誤った,3
+1051,familiar with,adj.,～をよく知っている,3
+1052,fasten,v.,締める,3
+1053,fault,n.,欠点・責任,3
+1054,favor,n.,親切な行為・好意,3
+1055,fee,n.,料金,3
+1056,female,adj.,女性の,3
+1057,fence,n.,柵,3
+1058,figure,n.,数字・人物・図,3
+1059,flat,adj.,平らな,3
+1060,flavor,n.,風味,3
+1061,float,v.,浮かぶ,3
+1062,flood,n.,洪水,3
+1063,flow,v.,流れる,3
+1064,fluent,adj.,流暢な,3
+1065,focus on,v.,～に集中する,3
+1066,fold,v.,折る,3
+1067,fool,n.,ばか者,3
+1068,forgive,v.,許す,3
+1069,formal,adj.,正式な,3
+1070,fortunately,adv.,幸運にも,3
+1071,frame,n.,枠,3
+1072,frighten,v.,怖がらせる,3
+1073,fuel,n.,燃料,3
+1074,function,n.,機能,3
+1075,further,adj.,さらなる,3
+1076,gain,v.,得る,3
+1077,general,adj.,一般的な,3
+1078,generally,adv.,一般に,3
+1079,generation,n.,世代,3
+1080,generous,adj.,寛大な,3
+1081,gesture,n.,身ぶり,3
+1082,global,adj.,世界的な,3
+1083,globe,n.,地球,3
+1084,grab,v.,つかむ,3
+1085,graduate from,v.,～を卒業する,3
+1086,grain,n.,穀物,3
+1087,growth,n.,成長,3
+1088,guard,v.,守る,3
+1089,hand in,v.,～を提出する,3
+1090,handle,v.,扱う,3
+1091,harbor,n.,港,3
+1092,hardly,adv.,ほとんど～ない,3
+1093,harm,n.,害,3
+1094,harmful,adj.,有害な,3
+1095,harvest,n.,収穫,3
+1096,highly,adv.,大いに,3
+1097,hire,v.,雇う,3
+1098,historical,adj.,歴史の,3
+1099,honor,n.,名誉,3
+1100,horrible,adj.,恐ろしい,3
+1101,host,n.,主催者,3
+1102,housing,n.,住宅,3
+1103,ideal,adj.,理想的な,3
+1104,ignore,v.,無視する,3
+1105,immediately,adv.,ただちに,3
+1106,impact,n.,影響,3
+1107,import,v.,輸入する,3
+1108,impress,v.,感銘を与える,3
+1109,impression,n.,印象,3
+1110,in spite of,prep.,～にもかかわらず,3
+1111,including,prep.,～を含めて,3
+1112,income,n.,収入,3
+1113,indeed,adv.,実際に,3
+1114,independent,adj.,独立した,3
+1115,industrial,adj.,産業の,3
+1116,industry,n.,産業,3
+1117,influence,n.,影響,3
+1118,inform,v.,知らせる,3
+1119,ingredient,n.,材料,3
+1120,injure,v.,けがをさせる,3
+1121,injury,n.,けが,3
+1122,instant,adj.,即時の,3
+1123,instruction,n.,指示,3
+1124,instrument,n.,器具・楽器,3
+1125,intelligence,n.,知能,3
+1126,intelligent,adj.,知能の高い,3
+1127,intend to,v.,～するつもりだ,3
+1128,interrupt,v.,さえぎる,3
+1129,issue,n.,問題・発行,3
+1130,jealous,adj.,嫉妬した,3
+1131,judgment,n.,判断,3
+1132,labor,n.,労働,3
+1133,laboratory,n.,実験室,3
+1134,lack,n.,不足,3
+1135,lately,adv.,最近,3
+1136,lay,v.,横たえる・置く,3
+1137,layer,n.,層,3
+1138,lead to,v.,～につながる,3
+1139,lean,v.,寄りかかる,3
+1140,lecture,n.,講義,3
+1141,likely,adj.,ありそうな,3
+1142,link,v.,結びつける,3
+1143,liquid,n.,液体,3
+1144,literature,n.,文学,3
+1145,locate,v.,位置づける,3
+1146,location,n.,場所,3
+1147,loss,n.,損失,3
+1148,lower,v.,下げる,3
+1149,luggage,n.,手荷物,3
+1150,lung,n.,肺,3
+1151,major,adj.,主要な,3
+1152,male,adj.,男性の,3
+1153,manage to,v.,どうにか～する,3
+1154,management,n.,経営,3
+1155,manner,n.,方法・態度,3
+1156,measure,v.,測る,3
+1157,media,n.,媒体・報道機関,3
+1158,mental,adj.,精神の,3
+1159,mention,v.,言及する,3
+1160,mess,n.,散らかった状態,3
+1161,method,n.,方法,3
+1162,mine,n.,鉱山,3
+1163,mobile,adj.,移動できる,3
+1164,mood,n.,気分,3
+1165,motion,n.,動き,3
+1166,murder,n.,殺人,3
+1167,muscle,n.,筋肉,3
+1168,nation,n.,国家,3
+1169,native,adj.,生まれつきの・母国の,3
+1170,naturally,adv.,当然,3
+1171,negative,adj.,否定的な,3
+1172,neither,adv.,どちらも～ない,3
+1173,network,n.,網状組織,3
+1174,nor,conj.,～もまた～ない,3
+1175,nowadays,adv.,近ごろは,3
+1176,obey,v.,従う,3
+1177,occasion,n.,機会・場合,3
+1178,official,adj.,公式の,3
+1179,operate,v.,操作する・手術する,3
+1180,operation,n.,操作・手術,3
+1181,opportunity,n.,機会,3
+1182,opposite,adj.,反対の,3
+1183,option,n.,選択肢,3
+1184,ordinary,adj.,普通の,3
+1185,organ,n.,臓器,3
+1186,organization,n.,組織,3
+1187,original,adj.,最初の・独創的な,3
+1188,overseas,adv.,海外へ,3
+1189,pale,adj.,青白い,3
+1190,particular,adj.,特定の,3
+1191,particularly,adv.,特に,3
+1192,passage,n.,一節・通路,3
+1193,passion,n.,情熱,3
+1194,pause,v.,一時停止する,3
+1195,peak,n.,頂点,3
+1196,per,prep.,～につき,3
+1197,perform,v.,行う・演じる,3
+1198,performance,n.,公演・成績,3
+1199,permission,n.,許可,3
+1200,permit,v.,許可する,3
+1201,personality,n.,性格,3
+1202,physical,adj.,身体の・物理の,3
+1203,plain,adj.,明白な・質素な,3
+1204,plenty of,adj.,たくさんの,3
+1205,poison,n.,毒,3
+1206,policy,n.,政策・方針,3
+1207,political,adj.,政治の,3
+1208,politics,n.,政治,3
+1209,pollute,v.,汚染する,3
+1210,positive,adj.,肯定的な,3
+1211,possibility,n.,可能性,3
+1212,pour,v.,注ぐ,3
+1213,practical,adj.,実用的な,3
+1214,praise,v.,ほめる,3
+1215,precious,adj.,貴重な,3
+1216,pressure,n.,圧力,3
+1217,pretend,v.,ふりをする,3
+1218,prevent,v.,妨げる,3
+1219,pride,n.,誇り,3
+1220,prison,n.,刑務所,3
+1221,process,n.,過程,3
+1222,production,n.,生産,3
+1223,professional,adj.,専門的な,3
+1224,profit,n.,利益,3
+1225,progress,n.,進歩,3
+1226,proper,adj.,適切な,3
+1227,propose,v.,提案する,3
+1228,prove,v.,証明する,3
+1229,provide,v.,提供する,3
+1230,publish,v.,出版する,3
+1231,punish,v.,罰する,3
+1232,pure,adj.,純粋な,3
+1233,quantity,n.,量,3
+1234,range,n.,範囲,3
+1235,rapid,adj.,急速な,3
+1236,rare,adj.,まれな,3
+1237,rate,n.,割合・速度,3
+1238,rather than,conj.,～よりむしろ,3
+1239,react,v.,反応する,3
+1240,reaction,n.,反応,3
+1241,reasonable,adj.,妥当な,3
+1242,recognize,v.,認識する,3
+1243,recommend,v.,勧める,3
+1244,recover from,v.,～から回復する,3
+1245,reduce,v.,減らす,3
+1246,refuse,v.,断る,3
+1247,region,n.,地域,3
+1248,register,v.,登録する,3
+1249,regret,v.,後悔する,3
+1250,relate to,v.,～と関係がある,3
+1251,relation,n.,関係,3
+1252,relative,n.,親戚,3
+1253,release,v.,解放する・発表する,3
+1254,religion,n.,宗教,3
+1255,religious,adj.,宗教の,3
+1256,remain,v.,～のままである・残る,3
+1257,remind,v.,思い出させる,3
+1258,remove,v.,取り除く,3
+1259,replace,v.,取り替える,3
+1260,require,v.,必要とする,3
+1261,rescue,v.,救助する,3
+1262,reserve,v.,予約する,3
+1263,resource,n.,資源,3
+1264,respond to,v.,～に応答する,3
+1265,response,n.,反応,3
+1266,responsibility,n.,責任,3
+1267,responsible for,adj.,～に責任がある,3
+1268,retire,v.,退職する,3
+1269,review,v.,見直す・批評する,3
+1270,reward,n.,報酬,3
+1271,rob,v.,奪う,3
+1272,rough,adj.,粗い・大まかな,3
+1273,route,n.,経路,3
+1274,routine,n.,日課,3
+1275,royal,adj.,王室の,3
+1276,rubbish,n.,ごみ,3
+1277,rude,adj.,無礼な,3
+1278,ruin,v.,台無しにする,3
+1279,salary,n.,給料,3
+1280,satisfied with,adj.,～に満足して,3
+1281,satisfy,v.,満足させる,3
+1282,scientific,adj.,科学的な,3
+1283,scream,v.,悲鳴を上げる,3
+1284,select,v.,選ぶ,3
+1285,selfish,adj.,利己的な,3
+1286,senior,adj.,年上の・上級の,3
+1287,separate,v.,分ける,3
+1288,series,n.,連続,3
+1289,shade,n.,日陰,3
+1290,shadow,n.,影,3
+1291,shame,n.,恥,3
+1292,shelter,n.,避難所,3
+1293,silence,n.,沈黙,3
+1294,site,n.,場所・用地,3
+1295,soil,n.,土壌,3
+1296,solar,adj.,太陽の,3
+1297,solid,adj.,固体の・堅固な,3
+1298,solution,n.,解決策,3
+1299,somehow,adv.,どうにかして,3
+1300,soul,n.,魂,3
+1301,source,n.,源・出典,3
+1302,split,v.,分割する,3
+1303,spot,n.,地点・染み,3
+1304,spread,v.,広がる,3
+1305,standard,n.,基準,3
+1306,stare at,v.,～をじっと見る,3
+1307,statement,n.,声明,3
+1308,steel,n.,鋼鉄,3
+1309,stream,n.,小川・流れ,3
+1310,strength,n.,強さ,3
+1311,stretch,v.,伸ばす,3
+1312,strict,adj.,厳格な,3
+1313,strike,v.,打つ,3
+1314,structure,n.,構造,3
+1315,stuff,n.,もの,3
+1316,suffer from,v.,～に苦しむ,3
+1317,suggestion,n.,提案,3
+1318,suitable for,adj.,～に適した,3
+1319,sum,n.,合計,3
+1320,summary,n.,要約,3
+1321,supply,v.,供給する,3
+1322,suppose,v.,思う・仮定する,3
+1323,surface,n.,表面,3
+1324,surround,v.,取り囲む,3
+1325,survey,n.,調査,3
+1326,survive,v.,生き残る,3
+1327,swallow,v.,飲み込む,3
+1328,symbol,n.,象徴,3
+1329,tale,n.,話,3
+1330,talent,n.,才能,3
+1331,target,n.,標的,3
+1332,tax,n.,税金,3
+1333,tear,v.,引き裂く,3
+1334,technique,n.,技術,3
+1335,tend to,v.,～する傾向がある,3
+1336,term,n.,用語・期間・条件,3
+1337,theme,n.,主題,3
+1338,theory,n.,理論,3
+1339,therefore,adv.,それゆえ,3
+1340,throughout,prep.,～の至る所に,3
+1341,tidy,adj.,整然とした,3
+1342,tone,n.,口調・音色,3
+1343,tough,adj.,困難な・丈夫な,3
+1344,trade,n.,貿易,3
+1345,transport,v.,輸送する,3
+1346,treat,v.,扱う・治療する,3
+1347,treatment,n.,治療・扱い,3
+1348,trend,n.,傾向,3
+1349,trick,n.,策略,3
+1350,tropical,adj.,熱帯の,3
+1351,tune,n.,曲・調子,3
+1352,typical,adj.,典型的な,3
+1353,unexpected,adj.,予期しない,3
+1354,unfortunately,adv.,不運にも,3
+1355,unique,adj.,独特の,3
+1356,unite,v.,結合する,3
+1357,universe,n.,宇宙,3
+1358,unless,conj.,～でない限り,3
+1359,upset,adj.,動揺した,3
+1360,valuable,adj.,価値のある,3
+1361,variety,n.,多様性,3
+1362,various,adj.,さまざまな,3
+1363,vehicle,n.,乗り物,3
+1364,version,n.,版,3
+1365,victim,n.,犠牲者,3
+1366,violence,n.,暴力,3
+1367,violent,adj.,暴力的な,3
+1368,visible,adj.,目に見える,3
+1369,vision,n.,視力・展望,3
+1370,volume,n.,量・音量・巻,3
+1371,vote,v.,投票する,3
+1372,warn,v.,警告する,3
+1373,warning,n.,警告,3
+1374,weapon,n.,武器,3
+1375,whisper,v.,ささやく,3
+1376,widely,adv.,広く,3
+1377,wipe,v.,ふく,3
+1378,within,prep.,～以内に,3
+1379,worth,adj.,～の価値がある,3
+1380,wrap,v.,包む,3
+1381,yawn,v.,あくびをする,3
+1382,yell,v.,どなる,3
+1383,youth,n.,若さ・若者,3
+1384,zone,n.,地帯,3
+1385,abroad,adv.,海外へ,4
+1386,absolutely,adv.,まったく・絶対に,4
+1387,account,n.,説明・口座,4
+1388,active,adj.,活動的な,4
+1389,addition,n.,追加,4
+1390,adult,n.,大人,4
+1391,advance,n.,前進・進歩,4
+1392,adventure,n.,冒険,4
+1393,advise,v.,助言する,4
+1394,annoy,v.,いらいらさせる,4
+1395,anxious about,adj.,心配して,4
+1396,anxious for,adj.,～を切望して,4
+1397,apply to,v.,～に当てはまる,4
+1398,appreciate,v.,感謝する・正しく理解する,4
+1399,approach,v.,近づく,4
+1400,appropriate for,adj.,適切な,4
+1401,argue about,v.,～について議論する,4
+1402,argue with,v.,言い争う,4
+1403,arrive in,v.,(広い場所に)到着する,4
+1404,artificial,adj.,人工の,4
+1405,aspect,n.,側面,4
+1406,assume,v.,想定する,4
+1407,ban,v.,禁止する,4
+1408,battle,n.,戦い,4
+1409,be based on,v.,基づいている,4
+1410,bear,v.,耐える・産む,4
+1411,beat,v.,打ち負かす・打つ,4
+1412,behave,v.,ふるまう,4
+1413,brief,adj.,簡潔な,4
+1414,budget,n.,予算,4
+1415,calm,adj.,穏やかな,4
+1416,cancel,v.,取り消す,4
+1417,cancer,n.,がん,4
+1418,capable of,adj.,能力がある,4
+1419,capital,n.,首都・資本,4
+1420,cash,n.,現金,4
+1421,cell,n.,細胞,4
+1422,claim,v.,主張する,4
+1423,colleague,n.,同僚,4
+1424,command,n.,命令,4
+1425,commercial,adj.,商業の,4
+1426,compare to,v.,～にたとえる,4
+1427,compete for,v.,～を求めて競う,4
+1428,complain of,v.,(痛みなどを)訴える,4
+1429,complex,adj.,複雑な,4
+1430,conclude,v.,結論づける,4
+1431,conduct,v.,行う,4
+1432,confirm,v.,確認する,4
+1433,conflict,n.,対立,4
+1434,confuse,v.,混乱させる,4
+1435,consist in,v.,～に本質がある,4
+1436,constant,adj.,絶え間ない,4
+1437,construct,v.,建設する,4
+1438,consume,v.,消費する,4
+1439,context,n.,文脈,4
+1440,contrast,n.,対比,4
+1441,contribute to,v.,貢献する,4
+1442,convince,v.,〈A of B〉納得させる,4
+1443,crisis,n.,危機,4
+1444,critical,adj.,批判的な・重大な,4
+1445,criticize,v.,批判する,4
+1446,cruel,adj.,残酷な,4
+1447,cure,v.,〈A of B〉治す,4
+1448,current,adj.,現在の,4
+1449,debt,n.,借金,4
+1450,declare,v.,宣言する,4
+1451,decline,v.,減少する・断る,4
+1452,define,v.,定義する,4
+1453,definitely,adv.,確実に,4
+1454,delay,v.,遅らせる,4
+1455,deny,v.,否定する,4
+1456,deserve,v.,～に値する,4
+1457,despite,prep.,～にもかかわらず,4
+1458,determine,v.,決定する,4
+1459,distinguish,v.,区別する,4
+1460,distribute,v.,分配する,4
+1461,diverse,adj.,多様な,4
+1462,domestic,adj.,国内の・家庭の,4
+1463,dominate,v.,支配する,4
+1464,drought,n.,干ばつ,4
+1465,eager,adj.,熱心な,4
+1466,ease,n.,容易さ,4
+1467,efficient,adj.,効率的な,4
+1468,emerge,v.,現れる,4
+1469,emphasize,v.,強調する,4
+1470,encounter,v.,遭遇する,4
+1471,engage in,v.,～に従事する,4
+1472,enormous,adj.,巨大な,4
+1473,ensure,v.,確実にする,4
+1474,establish,v.,設立する,4
+1475,estimate,v.,見積もる,4
+1476,ethnic,adj.,民族の,4
+1477,evaluate,v.,評価する,4
+1478,eventually,adv.,結局は,4
+1479,evil,adj.,邪悪な,4
+1480,evolution,n.,進化,4
+1481,exceed,v.,超える,4
+1482,existence,n.,存在,4
+1483,expand,v.,拡大する,4
+1484,extend,v.,延ばす,4
+1485,extent,n.,程度・範囲,4
+1486,extreme,adj.,極端な,4
+1487,facility,n.,施設,4
+1488,factor,n.,要因,4
+1489,faith,n.,信頼・信仰,4
+1490,feature,n.,特徴,4
+1491,fellow,n.,仲間,4
+1492,fierce,adj.,激しい,4
+1493,finance,n.,財政,4
+1494,firm,adj.,固い・断固とした,4
+1495,flexible,adj.,柔軟な,4
+1496,fond of,adj.,～が好きで,4
+1497,former,adj.,以前の・前者の,4
+1498,found,v.,設立する,4
+1499,foundation,n.,基礎・財団,4
+1500,frequent,adj.,頻繁な,4
+1501,fund,n.,資金,4
+1502,fundamental,adj.,根本的な,4
+1503,gender,n.,性別,4
+1504,gene,n.,遺伝子,4
+1505,generate,v.,生み出す,4
+1506,genuine,adj.,本物の,4
+1507,glance,v.,ちらっと見る,4
+1508,gradually,adv.,徐々に,4
+1509,grant,v.,与える,4
+1510,grateful,adj.,感謝している,4
+1511,guarantee,v.,保証する,4
+1512,guilty,adj.,有罪の・罪悪感のある,4
+1513,hesitate,v.,ためらう,4
+1514,horizon,n.,地平線,4
+1515,household,n.,世帯,4
+1516,identify,v.,特定する,4
+1517,identity,n.,同一性・身元,4
+1518,illegal,adj.,違法な,4
+1519,illustrate,v.,例示する・図解する,4
+1520,indicate,v.,示す,4
+1521,individual,n.,個人,4
+1522,inevitable,adj.,避けられない,4
+1523,innocent,adj.,無罪の・無邪気な,4
+1524,innovation,n.,革新,4
+1525,insist on,v.,～を強く主張する,4
+1526,inspire,v.,着想を与える,4
+1527,institution,n.,機関・制度,4
+1528,insurance,n.,保険,4
+1529,intense,adj.,激しい,4
+1530,interaction,n.,相互作用,4
+1531,interfere with,v.,～を妨げる,4
+1532,internal,adj.,内部の,4
+1533,interpret,v.,解釈する,4
+1534,invest in,v.,～に投資する,4
+1535,investigate,v.,調査する,4
+1536,involve,v.,巻き込む・含む,4
+1537,justice,n.,正義,4
+1538,keen,adj.,熱心な・鋭い,4
+1539,landscape,n.,風景,4
+1540,latter,adj.,後者の,4
+1541,launch,v.,開始する・打ち上げる,4
+1542,legal,adj.,法律の・合法の,4
+1543,luxury,n.,ぜいたく,4
+1544,maintain,v.,維持する,4
+1545,majority,n.,大多数,4
+1546,manufacture,v.,製造する,4
+1547,mass,n.,大量・塊,4
+1548,means,n.,手段,4
+1549,merely,adv.,単に,4
+1550,military,adj.,軍の,4
+1551,minor,adj.,重要でない,4
+1552,modest,adj.,控えめな,4
+1553,monitor,v.,監視する,4
+1554,moral,adj.,道徳の,4
+1555,moreover,adv.,さらに,4
+1556,motivate,v.,動機づける,4
+1557,multiple,adj.,多数の,4
+1558,neglect,v.,怠る,4
+1559,nevertheless,adv.,それにもかかわらず,4
+1560,nuclear,adj.,原子力の,4
+1561,numerous,adj.,多数の,4
+1562,nutrition,n.,栄養,4
+1563,objective,n.,目標,4
+1564,observe,v.,観察する,4
+1565,obtain,v.,得る,4
+1566,obvious,adj.,明らかな,4
+1567,occupy,v.,占める,4
+1568,occur,v.,起こる,4
+1569,odd,adj.,奇妙な,4
+1570,oppose,v.,反対する,4
+1571,organic,adj.,有機の,4
+1572,origin,n.,起源,4
+1573,otherwise,adv.,さもなければ,4
+1574,outcome,n.,結果,4
+1575,overcome,v.,克服する,4
+1576,owe,v.,借りている,4
+1577,participate in,v.,～に参加する,4
+1578,peer,n.,同僚・仲間,4
+1579,penalty,n.,罰,4
+1580,perceive,v.,知覚する,4
+1581,permanent,adj.,永続的な,4
+1582,perspective,n.,観点,4
+1583,persuade,v.,説得する,4
+1584,phenomenon,n.,現象,4
+1585,philosophy,n.,哲学,4
+1586,portion,n.,部分,4
+1587,possess,v.,所有する,4
+1588,postpone,v.,延期する,4
+1589,potential,n.,可能性,4
+1590,poverty,n.,貧困,4
+1591,precise,adj.,正確な,4
+1592,predict,v.,予測する,4
+1593,presence,n.,存在,4
+1594,preserve,v.,保存する,4
+1595,previous,adj.,以前の,4
+1596,primary,adj.,主要な・初等の,4
+1597,principle,n.,原理,4
+1598,priority,n.,優先事項,4
+1599,procedure,n.,手順,4
+1600,profession,n.,専門職,4
+1601,promote,v.,促進する・昇進させる,4
+1602,prompt,v.,促す,4
+1603,proof,n.,証拠,4
+1604,property,n.,財産・特性,4
+1605,proportion,n.,割合,4
+1606,protest,v.,抗議する,4
+1607,psychology,n.,心理学,4
+1608,purchase,v.,購入する,4
+1609,qualify,v.,資格を与える,4
+1610,quote,v.,引用する,4
+1611,radical,adj.,根本的な・急進的な,4
+1612,recall,v.,思い出す,4
+1613,refer to,v.,～に言及する・～を参照する,4
+1614,reflect,v.,反射する・反映する,4
+1615,reform,n.,改革,4
+1616,regard,v.,みなす,4
+1617,reject,v.,拒絶する,4
+1618,relevant,adj.,関連のある,4
+1619,reliable,adj.,信頼できる,4
+1620,relief,n.,安心・救済,4
+1621,rely on,v.,～に頼る,4
+1622,remark,n.,発言,4
+1623,remarkable,adj.,注目すべき,4
+1624,remote,adj.,遠く離れた,4
+1625,represent,v.,表す・代表する,4
+1626,reputation,n.,評判,4
+1627,resident,n.,住民,4
+1628,resist,v.,抵抗する,4
+1629,resolve,v.,解決する,4
+1630,restore,v.,回復させる,4
+1631,restrict,v.,制限する,4
+1632,reveal,v.,明らかにする,4
+1633,reverse,v.,逆にする,4
+1634,revolution,n.,革命,4
+1635,rid of,v.,～を取り除く,4
+1636,rural,adj.,田舎の,4
+1637,sacrifice,v.,犠牲にする,4
+1638,scale,n.,規模・目盛り,4
+1639,scheme,n.,計画,4
+1640,scholar,n.,学者,4
+1641,secure,adj.,安全な,4
+1642,seek,v.,求める,4
+1643,sensitive,adj.,敏感な,4
+1644,settle,v.,定住する・解決する,4
+1645,severe,adj.,厳しい,4
+1646,shift,n.,変化・交替,4
+1647,shortage,n.,不足,4
+1648,significant,adj.,重要な,4
+1649,sincere,adj.,誠実な,4
+1650,slight,adj.,わずかな,4
+1651,species,n.,種,4
+1652,specific,adj.,特定の,4
+1653,spite,n.,悪意,4
+1654,spoil,v.,だめにする・甘やかす,4
+1655,stable,adj.,安定した,4
+1656,statistics,n.,統計,4
+1657,status,n.,地位,4
+1658,stick to,v.,～に固執する,4
+1659,stimulate,v.,刺激する,4
+1660,stock,n.,在庫・株,4
+1661,strategy,n.,戦略,4
+1662,struggle,v.,苦闘する,4
+1663,submit,v.,提出する,4
+1664,substance,n.,物質,4
+1665,sufficient,adj.,十分な,4
+1666,suspect,v.,疑う,4
+1667,sustain,v.,維持する,4
+1668,sympathy,n.,同情,4
+1669,symptom,n.,症状,4
+1670,temporary,adj.,一時的な,4
+1671,tendency,n.,傾向,4
+1672,territory,n.,領土,4
+1673,terror,n.,恐怖,4
+1674,therapy,n.,療法,4
+1675,threat,n.,脅威,4
+1676,threaten,v.,脅す,4
+1677,thus,adv.,このように,4
+1678,tide,n.,潮,4
+1679,trace,n.,跡,4
+1680,transfer,v.,移す,4
+1681,transform,v.,変形させる,4
+1682,trial,n.,試み・裁判,4
+1683,tribe,n.,部族,4
+1684,ultimate,adj.,究極の,4
+1685,undergo,v.,経験する,4
+1686,undertake,v.,引き受ける,4
+1687,unemployment,n.,失業,4
+1688,union,n.,組合・連合,4
+1689,universal,adj.,普遍的な,4
+1690,urban,adj.,都市の,4
+1691,urge,v.,促す,4
+1692,urgent,adj.,緊急の,4
+1693,vague,adj.,あいまいな,4
+1694,valid,adj.,有効な,4
+1695,vanish,v.,消える,4
+1696,vary,v.,異なる・変わる,4
+1697,vast,adj.,広大な,4
+1698,virtual,adj.,仮想の,4
+1699,virtue,n.,美徳,4
+1700,vital,adj.,不可欠な,4
+1701,vivid,adj.,鮮やかな,4
+1702,voyage,n.,航海,4
+1703,wage,n.,賃金,4
+1704,wander,v.,さまよう,4
+1705,wealth,n.,富,4
+1706,welfare,n.,福祉,4
+1707,widespread,adj.,広まった,4
+1708,willing to,adj.,～する気がある,4
+1709,withdraw,v.,引き出す・撤退する,4
+1710,witness,n.,目撃者,4
+1711,wound,n.,傷,4
+1712,yield,v.,産出する・譲る,4`;
+const SAMPLE = parseCSV(SAMPLE_CSV).slice(1).map(r=>{
+  const c={id:Number(r[0]),word:(r[1]||"").trim(),meaning:(r[3]||"").trim()};
+  if((r[2]||"").trim()) c.pos=r[2].trim();
+  if((r[4]||"").trim()) c.level=r[4].trim();
+  return c;
+}).filter(c=>c.word&&Number.isInteger(c.id));
+
+/* ---------------- 保存 ---------------- */
+const KEY="eitango-flash-v1";
+const DEFAULTS={intervalMs:500,mode:"M1",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:300,palette:"default"};
+let store={learned:{},settings:{...DEFAULTS},cards:null};
+try{
+  const raw=localStorage.getItem(KEY);
+  if(raw){const p=JSON.parse(raw);store.learned=p.learned||{};store.settings={...DEFAULTS,...(p.settings||{})};
+    if(Array.isArray(p.cards)&&p.cards.length) store.cards=p.cards;}
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+const cfg=store.settings;
+/* 上限を変えたので、以前に保存された範囲外の値を丸める */
+cfg.intervalMs=Math.min(3000,Math.max(100,cfg.intervalMs||500));
+cfg.rate=Math.min(3.0,Math.max(0.5,cfg.rate||1.0));
+cfg.meaningDelayMs=Math.min(3000,Math.max(0,cfg.meaningDelayMs==null?300:cfg.meaningDelayMs));
+if(cfg.run!=="manual") cfg.run="auto";
+/* 旧・出題範囲（3択）からの移行 */
+if(cfg.scope){ cfg.onlyNew=(cfg.scope==="new"); cfg.useRange=(cfg.scope==="range"); delete cfg.scope; }
+if(!Array.isArray(cfg.pos)) cfg.pos=null;
+if(!Array.isArray(cfg.level)) cfg.level=null;
+if(["M1","M2","M3"].indexOf(cfg.mode)<0) cfg.mode="M1";
+
+/* ---------------- 参照 ---------------- */
+const $=id=>document.getElementById(id);
+const S1=$("s1"),S2=$("s2"),S3=$("s3");
+let CARDS=[], byId=new Map();
+function rebuildCards(){
+  CARDS=(store.cards&&store.cards.length)? store.cards : SAMPLE;
+  byId=new Map(CARDS.map(c=>[c.id,c]));
+  const maxId=CARDS.length?CARDS[CARDS.length-1].id:1;
+  $("rng-from").max=maxId; $("rng-to").max=maxId;
+  if(cfg.to>maxId||cfg.to<1) cfg.to=maxId;
+  if(cfg.from>maxId||cfg.from<1) cfg.from=1;
+}
+const isLearned=id=>!!store.learned[id];
+
+/* ---------------- ホーム ---------------- */
+function scopeIds(){
+  const a=Math.min(cfg.from,cfg.to), b=Math.max(cfg.from,cfg.to);
+  const ps=cfg.pos, ls=cfg.level;
+  return CARDS.filter(c=>{
+    if(cfg.onlyNew && isLearned(c.id)) return false;
+    if(cfg.useRange && (c.id<a||c.id>b)) return false;
+    if(ps && ps.indexOf(String(c.pos==null?"":c.pos))<0) return false;
+    if(ls && ls.indexOf(String(c.level==null?"":c.level))<0) return false;
+    return true;
+  }).map(c=>c.id);
+}
+/* データに実際に入っている品詞とレベルを拾う */
+function distinct(key){
+  const set=new Set();
+  CARDS.forEach(c=>{ const v=c[key]; if(v!=null&&String(v).trim()!=="") set.add(String(v).trim()); });
+  const arr=[...set];
+  if(key==="level") arr.sort((x,y)=>(+x||0)-(+y||0)||x.localeCompare(y));
+  else arr.sort((x,y)=>x.localeCompare(y,"ja"));
+  return arr;
+}
+function renderChips(box,chips,key,values){
+  $(box).classList.toggle("hide",values.length<2);
+  if(values.length<2){ if(cfg[key]) { cfg[key]=null; } return; }
+  const sel=cfg[key];
+  $(chips).innerHTML=values.map(v=>
+    `<button data-v="${v.replace(/"/g,"&quot;")}" aria-pressed="${!sel||sel.indexOf(v)>=0}">${v}</button>`).join("");
+}
+function chipClick(key,values,e){
+  const b=e.target.closest("button"); if(!b) return;
+  const v=b.dataset.v;
+  let sel=cfg[key]? cfg[key].slice() : values.slice();
+  const i=sel.indexOf(v);
+  if(i>=0) sel.splice(i,1); else sel.push(v);
+  if(!sel.length) sel=values.slice();                 // 全部外したら全選択に戻す
+  cfg[key]=(sel.length===values.length)? null : sel;
+  save(); renderHome();
+}
+const MODE_LABEL={M1:"語義同時",M2:"語義遅延",M3:"単語のみ"};
+const RUN_LABEL={auto:"自動再生",manual:"手動送り"};
+const PALETTES={"default":1,"konmari":1,"mono":1,"orange":1,"monogram":1,"paper":1};
+function applyPalette(){
+  const el=document.documentElement;
+  if(cfg.palette==="default") el.removeAttribute("data-palette");
+  else el.setAttribute("data-palette",cfg.palette);
+}
+const ORDER_LABEL={seq:"登録順",random:"ランダム"};
+const SPEAK_LABEL={off:"なし",flow:"流す",wait:"言い切る"};
+
+function renderHome(){
+  const total=CARDS.length, done=CARDS.filter(c=>isLearned(c.id)).length;
+  $("st-learned").textContent=done;
+  $("st-left").textContent=total-done;
+  const rate=total?done/total*100:0;
+  $("st-rate").textContent=rate.toFixed(1)+"%";
+  $("st-bar").style.width=rate+"%";
+  $("scope-count").textContent=scopeIds().length;
+  $("home-order").textContent=ORDER_LABEL[cfg.order];
+  [...$("order-seg").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.order===cfg.order)));
+  $("home-int").textContent=(cfg.intervalMs/1000).toFixed(2);
+  $("home-mode").textContent=RUN_LABEL[cfg.run]+"・"+MODE_LABEL[cfg.mode];
+  $("home-speak").textContent=SPEAK_LABEL[cfg.speak];
+  $("tts-status").textContent=ttsStatus();
+  [...$("pal-seg").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.pal===cfg.palette)));
+  $("data-count").textContent=CARDS.length;
+  $("data-src").textContent=(store.cards&&store.cards.length)?"読み込んだCSV":"同梱の1712語";
+  $("sc-new").checked=!!cfg.onlyNew;
+  $("sc-range").checked=!!cfg.useRange;
+  $("scope-range").classList.toggle("hide",!cfg.useRange);
+  renderChips("pos-box","pos-chips","pos",distinct("pos"));
+  renderChips("lv-box","lv-chips","level",distinct("level"));
+  renderWeek();
+}
+function renderWeek(){
+  const counts=new Array(7).fill(0), labels=[];
+  const today=new Date(); today.setHours(0,0,0,0);
+  const keys=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(today); d.setDate(d.getDate()-i);
+    keys.push(d.toISOString().slice(0,10));
+    labels.push(["日","月","火","水","木","金","土"][d.getDay()]);
+  }
+  Object.values(store.learned).forEach(v=>{
+    if(!v||!v.at) return;
+    const k=new Date(v.at); if(isNaN(k)) return;
+    const s=new Date(k.getFullYear(),k.getMonth(),k.getDate()).toISOString().slice(0,10);
+    const i=keys.indexOf(s); if(i>=0) counts[i]++;
+  });
+  const max=Math.max(1,...counts);
+  $("week").innerHTML=counts.map((c,i)=>
+    `<div><span class="b${c?"":" zero"}" style="height:${c?Math.max(6,c/max*44):3}px" title="${c}語"></span><span class="d">${labels[i]}</span></div>`
+  ).join("");
+}
+$("sc-new").addEventListener("change",e=>{ cfg.onlyNew=e.target.checked; save(); renderHome(); });
+$("sc-range").addEventListener("change",e=>{ cfg.useRange=e.target.checked; save(); renderHome(); });
+$("pos-chips").addEventListener("click",e=>chipClick("pos",distinct("pos"),e));
+$("lv-chips").addEventListener("click",e=>chipClick("level",distinct("level"),e));
+$("pos-all").addEventListener("click",()=>{ cfg.pos=null; save(); renderHome(); });
+$("lv-all").addEventListener("click",()=>{ cfg.level=null; save(); renderHome(); });
+$("order-seg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  cfg.order=b.dataset.order; save(); renderHome();
+});
+$("rng-from").addEventListener("input",e=>{cfg.from=+e.target.value||1;save();renderHome();});
+$("rng-to").addEventListener("input",e=>{cfg.to=+e.target.value||50;save();renderHome();});
+
+/* ---------------- CSV 入出力 ---------------- */
+function parseCSV(text){
+  text=String(text).replace(/^\uFEFF/,"");
+  const rows=[]; let row=[], cur="", q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else q=false; }
+      else cur+=c;
+    }else{
+      if(c==='"') q=true;
+      else if(c===","){ row.push(cur); cur=""; }
+      else if(c==="\n"){ row.push(cur); rows.push(row); row=[]; cur=""; }
+      else if(c!=="\r") cur+=c;
+    }
+  }
+  if(cur!==""||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>!(r.length===1&&r[0].trim()===""));
+}
+function csvCell(v){
+  v=String(v==null?"":v);
+  return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+function buildCSV(){
+  const hasPos=CARDS.some(c=>c.pos!=null), hasLv=CARDS.some(c=>c.level!=null);
+  const head=["id","word","meaning"];
+  if(hasPos) head.push("pos");
+  if(hasLv) head.push("level");
+  head.push("learned","learnedAt");
+  const out=[head.join(",")];
+  CARDS.forEach(c=>{
+    const p=store.learned[c.id], row=[c.id,csvCell(c.word),csvCell(c.meaning)];
+    if(hasPos) row.push(csvCell(c.pos));
+    if(hasLv) row.push(csvCell(c.level));
+    row.push(p?1:0,p&&p.at?p.at:"");
+    out.push(row.join(","));
+  });
+  return out.join("\n");
+}
+/* 列の見つけ方。ヘッダの名前を手がかりにする。
+   実際の単語リストは列の並びも名前もまちまちなので、決め打ちにしない */
+const COL={
+  id:["id","no","no.","num","number","番号","通し番号","連番","#"],
+  word:["word","english","term","spelling","英単語","単語","英語","つづり"],
+  meaning:["meaning","japanese","translation","意味","語義","訳","和訳","日本語"],
+  pos:["pos","part","partofspeech","品詞"],
+  level:["level","lv","lvl","レベル","難易度","段階","ランク"],
+  learned:["learned","暗記済","覚えた"],
+  learnedat:["learnedat","learned_at","暗記日"]
+};
+function findCols(head){
+  const norm=h=>String(h||"").trim().toLowerCase().replace(/[\s_.]/g,"");
+  const hs=head.map(norm), out={};
+  Object.keys(COL).forEach(k=>{
+    out[k]=hs.findIndex(h=>COL[k].some(c=>h===norm(c)));
+  });
+  return out;
+}
+function importCSV(text){
+  const rows=parseCSV(text);
+  if(rows.length<2){ alert("読み込める行がありません。1行目のヘッダと、2行目以降のデータが要ります。"); return; }
+  const col=findCols(rows[0]);
+  if(col.word<0||col.meaning<0){
+    alert("英単語の列と意味の列を見つけられませんでした。\n\n読み取った1行目：「"+rows[0].join(",")+"」\n\n"+
+          "英単語の列は word / 英単語 / 単語 のいずれか、\n意味の列は meaning / 意味 / 語義 / 訳 のいずれかの名前にしてください。");
+    return;
+  }
+  const list=[], prog={}, seen=new Set(), errors=[];
+  let auto=0;
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i], ln=i+1;
+    const w=(r[col.word]||"").trim(), m=(r[col.meaning]||"").trim();
+    if(!w&&!m) continue;                       // 空行は黙って飛ばす
+    if(!w){ errors.push(ln+"行目：英単語が空です"); continue; }
+    let id;
+    if(col.id>=0){
+      const raw=(r[col.id]||"").trim();
+      if(!/^\d+$/.test(raw)){ errors.push(ln+"行目：番号が整数ではありません（「"+raw+"」）"); continue; }
+      id=Number(raw);
+      if(id<1){ errors.push(ln+"行目：番号が1以上ではありません（"+id+"）"); continue; }
+    }else{
+      id=++auto;                               // 番号の列が無ければ順に振る
+    }
+    if(seen.has(id)){ errors.push(ln+"行目：番号 "+id+" が重複しています"); continue; }
+    seen.add(id);
+    const card={id:id,word:w,meaning:m};
+    if(col.pos>=0){ const v=(r[col.pos]||"").trim(); if(v) card.pos=v; }
+    if(col.level>=0){ const v=(r[col.level]||"").trim(); if(v) card.level=v; }
+    list.push(card);
+    if(col.learned>=0 && /^(1|true|yes|○|◯)$/i.test((r[col.learned]||"").trim())){
+      prog[id]={at:((col.learnedat>=0?r[col.learnedat]:"")||"").trim()||new Date().toISOString()};
+    }
+  }
+  if(!list.length){ alert("有効な行が1つもありませんでした。\n\n"+errors.slice(0,8).join("\n")); return; }
+
+  const used=[];
+  used.push("番号＝"+(col.id>=0?"「"+rows[0][col.id]+"」列":"行の順に自動で割り当て"));
+  used.push("英単語＝「"+rows[0][col.word]+"」列");
+  used.push("意味＝「"+rows[0][col.meaning]+"」列");
+  if(col.pos>=0) used.push("品詞＝「"+rows[0][col.pos]+"」列（出題範囲の絞り込みに使う）");
+  if(col.level>=0) used.push("レベル＝「"+rows[0][col.level]+"」列（出題範囲の絞り込みに使う）");
+  const keep=[col.id,col.word,col.meaning,col.pos,col.level,col.learned,col.learnedat];
+  const ignored=rows[0].filter((h,i)=>keep.indexOf(i)<0);
+  let msg="使う列\n  "+used.join("\n  ");
+  if(ignored.length) msg+="\n使わない列\n  "+ignored.join(" / ");
+  msg+="\n\n読み込める行： "+list.length+" 件";
+  if(errors.length){
+    msg+="\n読み飛ばす行： "+errors.length+" 件\n"+errors.slice(0,6).join("\n");
+    if(errors.length>6) msg+="\n…ほか "+(errors.length-6)+" 件";
+  }
+  const del=$("csv-del").checked;
+  if(del) msg+="\n\n※ このCSVに無い単語は削除されます。";
+  msg+="\n\nこの内容で読み込みますか。";
+  if(!confirm(msg)) return;
+
+  const map=new Map((store.cards&&store.cards.length?store.cards:SAMPLE).map(c=>[c.id,Object.assign({},c)]));
+  list.forEach(c=>map.set(c.id,c));
+  if(del) [...map.keys()].forEach(id=>{ if(!seen.has(id)) map.delete(id); });
+  store.cards=[...map.values()].sort((a,b)=>a.id-b.id);
+  Object.keys(prog).forEach(id=>{ if(map.has(+id)) store.learned[id]=prog[id]; });
+  Object.keys(store.learned).forEach(id=>{ if(!map.has(+id)) delete store.learned[id]; });
+
+  const t0=performance.now(); save(); const ms=performance.now()-t0;
+  rebuildCards(); renderHome();
+  alert("読み込みました。\n単語 "+CARDS.length+" 語、暗記済 "+Object.keys(store.learned).length+" 語。\n保存にかかった時間： "+ms.toFixed(1)+" ミリ秒");
+}
+$("csv-in").addEventListener("change",e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ importCSV(r.result); }catch(err){ alert("読み込みに失敗しました："+err.message); } e.target.value=""; };
+  r.onerror=()=>{ alert("ファイルを読めませんでした。"); e.target.value=""; };
+  r.readAsText(f,"UTF-8");
+});
+$("csv-out").addEventListener("click",()=>{
+  const csv=buildCSV();
+  const ta=$("csv-text"); ta.value=csv; ta.classList.remove("hide"); $("csv-hint").classList.remove("hide"); ta.focus(); ta.select();
+  try{
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="eitango-"+new Date().toISOString().slice(0,10)+".csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  }catch(e){}
+});
+$("btn-sample").addEventListener("click",()=>{
+  if(!confirm("同梱の1712語に戻します。読み込んだ単語と、それに紐づく進捗は消えます。よろしいですか。")) return;
+  store.cards=null; store.learned={}; save(); rebuildCards(); renderHome();
+});
+
+$("pal-seg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  cfg.palette=b.dataset.pal; save(); applyPalette(); renderHome();
+});
+$("btn-tts-test").addEventListener("click",()=>{
+  loadVoices();
+  const save0=cfg.speak; if(cfg.speak==="off") cfg.speak="flow";
+  syncOnce=true; speakWord("hello");
+  cfg.speak=save0;
+  $("tts-status").textContent=ttsStatus();
+  setTimeout(()=>{ loadVoices(); $("tts-status").textContent=ttsStatus(); },600);
+});
+$("btn-reset").addEventListener("click",()=>{
+  if(!confirm("暗記済の記録をすべて消します。よろしいですか。")) return;
+  if(!confirm("元に戻せません。本当に消しますか。")) return;
+  store.learned={}; save(); renderHome();
+});
+
+/* ---------------- 発音（Web Speech API） ---------------- */
+const TTS = ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
+let enVoice=null;
+function voiceList(){
+  try{ return speechSynthesis.getVoices()||[]; }catch(e){ return []; }
+}
+function loadVoices(){
+  const vs=voiceList();
+  enVoice = vs.find(v=>/^en[-_]US/i.test(v.lang)&&!/google\s*日本/i.test(v.name))
+         || vs.find(v=>/^en[-_]GB/i.test(v.lang))
+         || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+loadVoices();
+try{
+  speechSynthesis.addEventListener("voiceschanged",()=>{
+    loadVoices();
+    const el=document.getElementById("tts-status");
+    if(el&&!document.getElementById("s1").classList.contains("hide")) el.textContent=ttsStatus();
+  });
+}catch(e){}
+/* iOS/Safari は「利用者の操作と同じ実行の流れの中」で発話しないと以後鳴らない。
+   そこで開始直後やボタン操作直後の1回だけは、遅らせずその場で発話する。 */
+let syncOnce=false, speakSeq=0;
+function speakWord(text){
+  /* TTS の判定が外れていても鳴る可能性があるので、off のとき以外は必ず試す */
+  if(cfg.speak==="off"||!("speechSynthesis" in window)){ if(S) S.speaking=false; return; }
+  const my=++speakSeq;
+  let didCancel=false;
+  try{
+    if(speechSynthesis.paused) speechSynthesis.resume();
+    if(speechSynthesis.speaking||speechSynthesis.pending){ speechSynthesis.cancel(); didCancel=true; }
+  }catch(e){}
+  if(S){ S.speaking=true; S.speakDeadline=performance.now()+3500; }
+  const fire=()=>{
+    if(my!==speakSeq) return;                 // より新しいカードに追い越されていたら捨てる
+    try{
+      if(!enVoice) loadVoices();
+      const u=new SpeechSynthesisUtterance(text);
+      if(enVoice) u.voice=enVoice;
+      u.lang = enVoice? enVoice.lang : "en-US";
+      u.rate = cfg.rate; u.pitch = 1; u.volume = 1;
+      const done=()=>{ if(S&&my===speakSeq){ S.speaking=false; S.speakEndAt=performance.now(); } };
+      u.onend=done; u.onerror=done;
+      speechSynthesis.speak(u);
+    }catch(e){ if(S) S.speaking=false; }
+  };
+  if(syncOnce){ syncOnce=false; fire(); return; }
+  /* cancel() の直後に同期で speak() すると Chrome では無視されることがあるため少し遅らせる */
+  setTimeout(fire, didCancel?80:0);
+}
+function stopSpeech(){ speakSeq++; if(TTS){ try{ speechSynthesis.cancel(); }catch(e){} } if(S) S.speaking=false; }
+
+function ttsStatus(){
+  if(!TTS) return "このブラウザに音声合成が見つかりません。発音の切り替えは残してあるので、鳴るかどうかは実際に試してください。";
+  const vs=voiceList();
+  const en=vs.filter(v=>/^en/i.test(v.lang));
+  if(!vs.length) return "音声の一覧をまだ取得できていません。「発音をテスト」を押してみてください。";
+  if(!en.length) return `音声が ${vs.length} 件見つかりましたが、英語の音声が入っていません。端末の設定で英語の音声を追加すると鳴ります。`;
+  return `英語の音声 ${en.length} 件を検出（使用：${enVoice?enVoice.name+"／"+enVoice.lang:"未選択"}）。鳴らない場合は端末のマナーモードと音量を確認してください。`;
+}
+
+/* ---------------- セッション ---------------- */
+let S=null, raf=0, wakeLock=null;
+const BAR=()=>$("setbar").offsetHeight;
+
+async function requestWake(){
+  try{ if("wakeLock" in navigator && !wakeLock) wakeLock=await navigator.wakeLock.request("screen"); }catch(e){}
+}
+function releaseWake(){ try{ wakeLock&&wakeLock.release(); }catch(e){} wakeLock=null; }
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&S&&S.playing) requestWake();
+});
+
+function startSession(){
+  let q=scopeIds();
+  if(!q.length){ alert("対象の単語がありません。出題範囲を変えてください。"); return; }
+  if(cfg.order==="random") q=shuffled(q);
+  syncOnce=true;
+  S={queue:q,pos:0,maxPos:0,playing:false,cardStart:0,elapsed:0,runFrom:0,speaking:false,speakEndAt:0,
+     log:[],shown:new Set(),marked:[],rewinds:0,cardAt:0,manual:(cfg.run==="manual"),mode:cfg.mode,order:cfg.order,startedAt:Date.now()};
+  S1.classList.add("hide"); S3.classList.add("hide"); S2.classList.remove("hide");
+  syncSetbar();
+  $("p-total").textContent=q.length;
+  syncOnce=true; setPos(0);
+  if(S.manual){
+    S.runFrom=performance.now();
+    refreshControls(); requestWake();
+    cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+  }else{
+    play();
+  }
+}
+let meaningTimer=0;
+/* 語義が出ているか。M2は「カードを出してから語義遅延時間が経過したら」出す。
+   自動再生でも手動送りでも同じ判定を使うので、手動でも遅延表示が効く */
+function meaningShown(){
+  if(!S) return false;
+  if(S.mode==="M1") return true;
+  if(S.mode==="M2") return (performance.now()-S.cardAt)>=cfg.meaningDelayMs;
+  return false;   // M3 単語のみ。語義は出さない
+}
+function scheduleMeaning(){
+  clearTimeout(meaningTimer);
+  if(!S||S.mode!=="M2") return;
+  const left=cfg.meaningDelayMs-(performance.now()-S.cardAt);
+  if(left>0) meaningTimer=setTimeout(()=>{ if(S) render(); }, left+16);
+}
+function setPos(p){
+  S.pos=Math.max(0,Math.min(p,S.queue.length-1));
+  S.maxPos=Math.max(S.maxPos,S.pos);
+  S.shown.add(S.queue[S.pos]);
+  S.cardAt=performance.now();
+  render(); scheduleMeaning();
+  speakWord(byId.get(S.queue[S.pos]).word);
+}
+/* 手動送り／停止中の「次へ」。手動ではまだ自動再生されていないカードにも進める */
+/* 次へは送り方に関係なく、まだ表示していないカードへも進める。
+   最後まで行ったらセッションを終える */
+function nextCard(){
+  if(!S) return;
+  if(S.pos>=S.queue.length-1){ endSession(); return; }
+  setPos(S.pos+1);
+}
+function render(){
+  const w=byId.get(S.queue[S.pos]);
+  $("p-word").textContent=w.word;
+  const m=$("p-meaning");
+  const showMeaning=meaningShown();
+  m.textContent=w.meaning;
+  m.classList.toggle("ghost",!showMeaning);
+  m.style.visibility=showMeaning?"visible":"hidden";
+  $("p-badge").classList.toggle("hide",!isLearned(w.id));
+  $("p-pos").textContent=S.pos+1;
+  /* 覚えたボタンは再生中も停止中も常に出す。停止中だけ解除にも使える */
+  const on=(!S.playing&&isLearned(w.id));
+  $("btn-mark").textContent=on?"マークを外す":"覚えた";
+  $("btn-mark").classList.toggle("on",on);
+}
+/* 手動送りでは一時停止という状態がないので、右上の一時停止ボタンを隠し、
+   前へ・次への行を常に出す。画面タップは自動なら一時停止、手動なら次へ */
+function refreshControls(){
+  if(!S) return;
+  const m=S.manual, playing=S.playing;
+  $("btn-pause").classList.toggle("hide",m);
+  $("btn-pause").textContent=playing?"一時停止":"再開";
+  $("btn-pause").classList.toggle("acc",!playing&&!m);
+  $("row-pause1").classList.toggle("hide",!(m||!playing));
+  $("taplayer").style.pointerEvents=(m||playing)?"auto":"none";
+}
+function setPausedUI(){ refreshControls(); }
+function play(){
+  if(!S||S.playing) return;
+  S.playing=true; S.runFrom=performance.now(); S.cardStart=performance.now();
+  S.log=[{p:S.pos,t:S.cardStart}];
+  refreshControls();
+  render(); requestWake();
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+}
+function pause(atPos){
+  if(!S||!S.playing) return;
+  S.playing=false; cancelAnimationFrame(raf);
+  S.elapsed+=performance.now()-S.runFrom;
+  releaseWake(); stopSpeech();
+  refreshControls();
+  if(typeof atPos==="number") setPos(atPos); else render();
+  refreshControls(); updateHud();
+}
+const TAIL_MS=60;   // 読み終わってから次へ移るまでの余韻
+function advanceOne(at){
+  if(S.pos+1>=S.queue.length) return false;
+  S.pos++; S.maxPos=Math.max(S.maxPos,S.pos); S.shown.add(S.queue[S.pos]);
+  S.log.push({p:S.pos,t:at});
+  if(S.log.length>240) S.log.splice(0,S.log.length-240);
+  S.cardAt=performance.now();
+  render(); scheduleMeaning();
+  speakWord(byId.get(S.queue[S.pos]).word);
+  return true;
+}
+function tick(now){
+  if(!S){ raf=0; return; }
+  if(S.manual||!S.playing){ updateHud(now); raf=requestAnimationFrame(tick); return; }
+  const dur=cfg.intervalMs;
+  if(cfg.speak==="wait"){
+    /* 1枚の時間は「表示間隔」と「読み上げ時間」の長いほう。両方を足さない。
+       読み終わったら余韻だけ置いてすぐ次へ移る */
+    if(S.speaking&&now>=S.speakDeadline){ S.speaking=false; S.speakEndAt=now; }
+    if(now-S.cardStart>=dur && !S.speaking && now>=(S.speakEndAt||0)+TAIL_MS){
+      if(!advanceOne(now)){ endSession(); return; }
+      S.cardStart=now;
+    }
+  }else{
+    while(now-S.cardStart>=dur){
+      if(now-S.cardStart>dur*5){ S.cardStart=now; break; }   // タブ復帰時の飛びを防ぐ
+      S.cardStart+=dur;
+      if(!advanceOne(S.cardStart)){ endSession(); return; }
+    }
+  }
+  updateHud(now);
+  raf=requestAnimationFrame(tick);
+}
+function updateHud(now){
+  const t=S.elapsed+((S.playing||S.manual)?((now||performance.now())-S.runFrom):0);
+  $("p-time").textContent=(t/1000).toFixed(1)+"s";
+}
+/* 遅延補正：タップ時刻から lagMs さかのぼった時点で出ていたカード */
+function lagTarget(){
+  const t=performance.now()-cfg.lagMs;
+  let p=S.log.length?S.log[0].p:S.pos;
+  for(const e of S.log){ if(e.t<=t) p=e.p; else break; }
+  return p;
+}
+function markAt(p,{toast=true}={}){
+  const id=S.queue[p], w=byId.get(id);
+  if(isLearned(id)){ if(toast) showToast("暗記済のまま："+w.word,true); return; }
+  store.learned[id]={at:new Date().toISOString()}; save();
+  if(!S.marked.includes(id)) S.marked.push(id);
+  if(toast) showToast("覚えた："+w.word);
+}
+function unmarkAt(p){
+  const id=S.queue[p]; delete store.learned[id]; save();
+  const i=S.marked.indexOf(id); if(i>=0) S.marked.splice(i,1);
+}
+let toastTimer=0;
+function showToast(text,undo){
+  const el=$("toast"); el.textContent=text;
+  el.classList.toggle("undo",!!undo); el.classList.add("on");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("on"),1200);
+}
+/* 画面タップ */
+/* タップで一時停止すると操作帯が伸びてボタンの位置が変わる。
+   そのままだと touchend のあとに発生する合成クリックが、指の真下へ移動してきた
+   「覚えた」ボタンに当たり、押していないのにマークされてしまう。
+   一時停止した直後の1回だけクリックを飲み込んで、この誤爆を止める。 */
+function swallowNextClick(ms){
+  const h=ev=>{ ev.stopPropagation(); ev.preventDefault(); };
+  document.addEventListener("click",h,true);
+  setTimeout(()=>document.removeEventListener("click",h,true),ms||280);
+}
+function onTap(){
+  if(!S) return;
+  if(S.manual){ nextCard(); return; }   // 手動送りではタップ＝次へ
+  if(!S.playing) return;
+  const p=lagTarget();
+  pause(p);   // タップ＝一時停止。停止位置を見てから覚えたボタンで確定する
+  swallowNextClick();
+}
+$("taplayer").addEventListener("pointerdown",e=>{e.preventDefault();onTap();});
+$("taplayer").addEventListener("keydown",e=>{
+  if(e.key===" "||e.key==="Enter"){e.preventDefault();onTap();}
+});
+/* 右上の一時停止ボタンは、停止中は再開ボタンとして働く */
+$("btn-pause").addEventListener("click",()=>{
+  if(!S) return;
+  if(S.playing){ pause(); return; }
+  if(S.pos+1>=S.queue.length){ endSession(); return; }
+  syncOnce=true; setPos(S.pos+1); play();
+});
+$("btn-home2").addEventListener("click",()=>endSession());
+/* 前へ：停止中に1枚ずつ戻る。再生中は一時停止ボタンで止めてから使う */
+$("pb-prev").addEventListener("click",()=>{ if(!S) return; S.rewinds++; setPos(Math.max(0,S.pos-1)); });
+$("pb-next").addEventListener("click",nextCard);
+/* 覚えたボタン：再生中はその場でマークする。停止中は停止位置のカードのマークを付け外しする */
+$("btn-mark").addEventListener("click",()=>{
+  if(!S) return;
+  if(S.playing){ markAt(lagTarget()); return; }
+  const id=S.queue[S.pos];
+  if(isLearned(id)) unmarkAt(S.pos); else markAt(S.pos,{toast:false});
+  render();
+});
+
+document.addEventListener("keydown",e=>{
+  if(S2.classList.contains("hide")) return;
+  if(e.key==="ArrowLeft"){ e.preventDefault(); if(S.playing) pause(Math.max(0,lagTarget()-1)); else $("pb-prev").click(); }
+  else if(e.key==="ArrowRight"&&!S.playing){ e.preventDefault(); $("pb-next").click(); }
+  else if(e.key==="Escape"){ e.preventDefault(); endSession(); }
+  else if(e.key===" "){ e.preventDefault(); S.playing?onTap():$("btn-pause").click(); }
+  else if(e.key==="m"||e.key==="M"){ e.preventDefault(); $("btn-mark").click(); }
+});
+
+/* 再生画面の設定バー */
+function condText(){
+  const a=[RUN_LABEL[cfg.run],MODE_LABEL[cfg.mode]];
+  if(cfg.run==="auto") a.push("間隔 "+(cfg.intervalMs/1000).toFixed(2)+"s");
+  if(cfg.mode==="M2") a.push("語義 "+(cfg.meaningDelayMs/1000).toFixed(2)+"s");
+  a.push("発音 "+SPEAK_LABEL[cfg.speak]);
+  return a.join(" / ");
+}
+function syncSetbar(){
+  [...$("seg-mode").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===cfg.mode)));
+  [...$("seg-run").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.run===cfg.run)));
+  $("sl-mdelay").value=Math.round(cfg.meaningDelayMs/100);
+  $("sl-mdelay-v").textContent=(cfg.meaningDelayMs/1000).toFixed(2)+" s";
+  $("mdelay-row").classList.toggle("off",cfg.mode!=="M2");
+  $("sl-mdelay").disabled=(cfg.mode!=="M2");
+  $("int-row").classList.toggle("off",cfg.run==="manual");
+  $("sl-int").disabled=(cfg.run==="manual");
+  $("lag-row").classList.toggle("off",cfg.run==="manual");
+  $("sl-lag").disabled=(cfg.run==="manual");
+  $("cond-line").textContent=condText();
+  $("sl-int").value=Math.round(cfg.intervalMs/100);
+  $("sl-int-v").textContent=(cfg.intervalMs/1000).toFixed(2)+" s";
+  $("sl-lag").value=cfg.lagMs;
+  $("sl-lag-v").textContent=cfg.lagMs+" ms";
+  [...$("seg-speak").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.speak===cfg.speak)));
+  $("sl-rate").value=Math.round(cfg.rate*10);
+  $("sl-rate-v").textContent=cfg.rate.toFixed(1)+"x";
+  const mute=(cfg.speak==="off");
+  $("sl-rate").disabled=mute;
+  $("rate-row").classList.toggle("off",mute);
+  document.documentElement.style.setProperty("--barh",BAR()+"px");
+}
+$("btn-detail").textContent="詳細 ▸";
+$("btn-detail").addEventListener("click",()=>{
+  const d=$("detail"), open=d.classList.toggle("closed")===false;
+  $("btn-detail").setAttribute("aria-expanded",String(open));
+  $("btn-detail").textContent=open?"詳細 ▾":"詳細 ▸";
+  document.documentElement.style.setProperty("--barh",BAR()+"px");
+});
+/* 音声合成が見つからない場合もボタンは残す。判定が外れている可能性があるため、
+   選択肢を消さずに注意書きだけ出して、実際に試せるようにする */
+if(!TTS) $("speak-na").classList.remove("hide");
+$("seg-speak").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b||b.disabled) return;
+  cfg.speak=b.dataset.speak; save(); syncSetbar();
+  /* 操作の中で1度その場で鳴らしておく（iOSの制約）。今出ているカードを読む */
+  if(cfg.speak!=="off"&&S){ syncOnce=true; speakWord(byId.get(S.queue[S.pos]).word); } else stopSpeech();
+});
+$("sl-rate").addEventListener("input",e=>{
+  cfg.rate=(+e.target.value)/10; save(); $("sl-rate-v").textContent=cfg.rate.toFixed(1)+"x";
+});
+$("seg-mode").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  cfg.mode=b.dataset.mode; if(S) S.mode=cfg.mode;
+  save(); syncSetbar(); if(S){ render(); scheduleMeaning(); }
+});
+/* 送り方の切替。自動→手動は止めてから、手動→自動は停止状態にして再開待ちにする */
+$("seg-run").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  cfg.run=b.dataset.run; save();
+  if(S){
+    const now=performance.now();
+    if(cfg.run==="manual"){
+      if(S.playing){ S.playing=false; S.elapsed+=now-S.runFrom; releaseWake(); stopSpeech(); }
+      S.manual=true; S.runFrom=performance.now();
+      cancelAnimationFrame(raf); raf=requestAnimationFrame(tick); requestWake();
+    }else{
+      if(S.manual){ S.elapsed+=now-S.runFrom; }
+      S.manual=false; S.playing=false;
+    }
+    refreshControls();
+  }
+  syncSetbar();
+});
+$("sl-mdelay").addEventListener("input",e=>{
+  cfg.meaningDelayMs=(+e.target.value)*100; save();
+  $("sl-mdelay-v").textContent=(cfg.meaningDelayMs/1000).toFixed(2)+" s";
+  $("cond-line").textContent=condText();
+  if(S){ render(); scheduleMeaning(); }
+});
+$("sl-int").addEventListener("input",e=>{
+  cfg.intervalMs=(+e.target.value)*100; save();
+  $("sl-int-v").textContent=(cfg.intervalMs/1000).toFixed(2)+" s";
+  $("cond-line").textContent=condText();
+  if(S&&S.playing) S.cardStart=performance.now();
+});
+$("sl-lag").addEventListener("input",e=>{
+  cfg.lagMs=+e.target.value; save(); $("sl-lag-v").textContent=cfg.lagMs+" ms";
+});
+
+/* ---------------- 結果 ---------------- */
+function endSession(){
+  if(!S) return;
+  if(S.playing||S.manual){ S.playing=false; S.elapsed+=performance.now()-S.runFrom; }
+  S.manual=false; cancelAnimationFrame(raf); raf=0; clearTimeout(meaningTimer);
+  releaseWake(); stopSpeech();
+  const secs=S.elapsed/1000;
+  $("r-shown").textContent=S.shown.size;
+  $("r-marked").textContent=S.marked.length;
+  $("r-time").textContent=secs>=60?Math.floor(secs/60)+"分"+Math.round(secs%60)+"秒":secs.toFixed(1)+"秒";
+  $("r-rewind").textContent=S.rewinds;
+  const cond=[ORDER_LABEL[S.order],RUN_LABEL[cfg.run],MODE_LABEL[S.mode]];
+  if(cfg.run==="auto"){ cond.push(`表示間隔 ${(cfg.intervalMs/1000).toFixed(2)}秒`,`遅延補正 ${cfg.lagMs}ms`); }
+  if(S.mode==="M2") cond.push(`語義遅延 ${(cfg.meaningDelayMs/1000).toFixed(2)}秒`);
+  cond.push(`発音 ${SPEAK_LABEL[cfg.speak]}`);
+  $("res-cond").textContent=cond.join(" ／ ");
+  renderMarked();
+  S2.classList.add("hide"); S3.classList.remove("hide"); window.scrollTo(0,0);
+}
+function renderMarked(){
+  const el=$("r-list");
+  if(!S.marked.length){ el.innerHTML='<div class="empty">このセッションでマークした単語はありません。</div>'; return; }
+  el.innerHTML=S.marked.map(id=>{
+    const w=byId.get(id);
+    return `<div class="r${isLearned(id)?"":" off"}" data-id="${id}">
+      <span class="w">${w.word}</span><span class="m">${w.meaning}</span>
+      <button data-id="${id}">${isLearned(id)?"解除":"戻す"}</button></div>`;
+  }).join("");
+}
+$("r-list").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  const id=+b.dataset.id;
+  if(isLearned(id)) delete store.learned[id]; else store.learned[id]={at:new Date().toISOString()};
+  save(); renderMarked(); $("r-marked").textContent=S.marked.filter(i=>isLearned(i)).length;
+});
+$("btn-again").addEventListener("click",()=>{ S3.classList.add("hide"); startSession(); });
+$("btn-home").addEventListener("click",()=>{
+  S=null; S3.classList.add("hide"); S1.classList.remove("hide"); renderHome(); window.scrollTo(0,0);
+});
+$("btn-start").addEventListener("click",startSession);
+
+window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSetbar(); });
+rebuildCards();
+if(cfg.palette==="night") cfg.palette="mono";
+if(!PALETTES[cfg.palette]) cfg.palette="default";
+applyPalette();
+$("rng-from").value=cfg.from; $("rng-to").value=cfg.to;
+renderHome();
+</script>
+
+</body>
+</html>
