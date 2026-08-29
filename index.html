@@ -3,9 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1211">
+<meta name="theme-color" content="#f0e9de">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="英単フラッシュ">
 <meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
 <style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -296,7 +301,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
       <button data-order="seq" aria-pressed="true">登録順</button>
       <button data-order="random" aria-pressed="false">ランダム</button>
     </div>
-    <p class="note">対象 <b id="scope-count">0</b> 枚 ／ <b id="home-order">登録順</b> ／ 表示間隔 <b id="home-int">0.50</b> 秒 ／ <b id="home-mode">語義同時</b> ／ 発音 <b id="home-speak">流す</b></p>
+    <p class="note">対象 <b id="scope-count">0</b> 枚 ／ <b id="home-order">登録順</b> ／ 表示間隔 <b id="home-int">0.50</b> 秒 ／ <b id="home-mode">訳あり</b> ／ 発音 <b id="home-speak">流す</b></p>
   </div>
 
   <button class="btn primary big" id="btn-start">開始</button>
@@ -338,7 +343,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
   </div>
   <p class="note" id="tts-status" style="margin-top:10px"></p>
   <p class="note" style="margin-top:26px">進捗はこの端末のブラウザ内にだけ保存されます。</p>
-  <p class="ver">Ver. 2026-08-30 00:07</p>
+  <p class="ver" id="ver"></p>
 </div>
 
 <!-- ================= S2 再生 ================= -->
@@ -383,10 +388,9 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
         </div>
       </div>
       <div class="srow">
-        <div class="seg2" id="seg-mode" role="group" aria-label="表示モード">
-          <button data-mode="M1" aria-pressed="true">語義同時</button>
-          <button data-mode="M2" aria-pressed="false">語義遅延</button>
-          <button data-mode="M3" aria-pressed="false">単語のみ</button>
+        <div class="seg2" id="seg-mode" role="group" aria-label="訳の表示">
+          <button data-mode="on" aria-pressed="true">訳あり</button>
+          <button data-mode="off" aria-pressed="false">訳なし</button>
         </div>
       </div>
       <div class="srow">
@@ -403,7 +407,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
         <span class="v" id="sl-int-v">0.50 s</span>
       </div>
       <div class="slid" id="mdelay-row">
-        <label for="sl-mdelay">語義遅延</label>
+        <label for="sl-mdelay">訳遅延</label>
         <input type="range" id="sl-mdelay" min="0" max="30" step="1" value="3">
         <span class="v" id="sl-mdelay-v">0.30 s</span>
       </div>
@@ -2172,7 +2176,7 @@ const SAMPLE = parseCSV(SAMPLE_CSV).slice(1).map(r=>{
 
 /* ---------------- 保存 ---------------- */
 const KEY="eitango-flash-v1";
-const DEFAULTS={intervalMs:500,mode:"M1",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:300,palette:"default"};
+const DEFAULTS={intervalMs:500,mode:"on",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:0,palette:"default"};
 let store={learned:{},settings:{...DEFAULTS},cards:null};
 try{
   const raw=localStorage.getItem(KEY);
@@ -2190,7 +2194,13 @@ if(cfg.run!=="manual") cfg.run="auto";
 if(cfg.scope){ cfg.onlyNew=(cfg.scope==="new"); cfg.useRange=(cfg.scope==="range"); delete cfg.scope; }
 if(!Array.isArray(cfg.pos)) cfg.pos=null;
 if(!Array.isArray(cfg.level)) cfg.level=null;
-if(["M1","M2","M3"].indexOf(cfg.mode)<0) cfg.mode="M1";
+/* 旧・3モードからの移行。語義同時は訳あり＋遅延0と同じ */
+let migrated=false;
+if(cfg.mode==="M1"){ cfg.mode="on"; cfg.meaningDelayMs=0; migrated=true; }
+else if(cfg.mode==="M2"){ cfg.mode="on"; migrated=true; }
+else if(cfg.mode==="M3"){ cfg.mode="off"; migrated=true; }
+if(["on","off"].indexOf(cfg.mode)<0) cfg.mode="on";
+if(migrated) save();
 
 /* ---------------- 参照 ---------------- */
 const $=id=>document.getElementById(id);
@@ -2244,7 +2254,7 @@ function chipClick(key,values,e){
   cfg[key]=(sel.length===values.length)? null : sel;
   save(); renderHome();
 }
-const MODE_LABEL={M1:"語義同時",M2:"語義遅延",M3:"単語のみ"};
+const MODE_LABEL={on:"訳あり",off:"訳なし"};
 const RUN_LABEL={auto:"自動再生",manual:"手動送り"};
 const PALETTES={"default":1,"konmari":1,"mono":1,"orange":1,"monogram":1,"paper":1};
 function applyPalette(){
@@ -2573,17 +2583,16 @@ function startSession(){
   }
 }
 let meaningTimer=0;
-/* 語義が出ているか。M2は「カードを出してから語義遅延時間が経過したら」出す。
+/* 訳が出ているか。カードを出してから訳遅延時間が経過したら出す。
    自動再生でも手動送りでも同じ判定を使うので、手動でも遅延表示が効く */
 function meaningShown(){
   if(!S) return false;
-  if(S.mode==="M1") return true;
-  if(S.mode==="M2") return (performance.now()-S.cardAt)>=cfg.meaningDelayMs;
-  return false;   // M3 単語のみ。語義は出さない
+  if(S.mode!=="on") return false;                       // 訳なし
+  return (performance.now()-S.cardAt)>=cfg.meaningDelayMs;   // 遅延0なら即時＝同時表示
 }
 function scheduleMeaning(){
   clearTimeout(meaningTimer);
-  if(!S||S.mode!=="M2") return;
+  if(!S||S.mode!=="on"||cfg.meaningDelayMs<=0) return;
   const left=cfg.meaningDelayMs-(performance.now()-S.cardAt);
   if(left>0) meaningTimer=setTimeout(()=>{ if(S) render(); }, left+16);
 }
@@ -2763,7 +2772,7 @@ document.addEventListener("keydown",e=>{
 function condText(){
   const a=[RUN_LABEL[cfg.run],MODE_LABEL[cfg.mode]];
   if(cfg.run==="auto") a.push("間隔 "+(cfg.intervalMs/1000).toFixed(2)+"s");
-  if(cfg.mode==="M2") a.push("語義 "+(cfg.meaningDelayMs/1000).toFixed(2)+"s");
+  if(cfg.mode==="on"&&cfg.meaningDelayMs>0) a.push("訳遅延 "+(cfg.meaningDelayMs/1000).toFixed(2)+"s");
   a.push("発音 "+SPEAK_LABEL[cfg.speak]);
   return a.join(" / ");
 }
@@ -2772,8 +2781,8 @@ function syncSetbar(){
   [...$("seg-run").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.run===cfg.run)));
   $("sl-mdelay").value=Math.round(cfg.meaningDelayMs/100);
   $("sl-mdelay-v").textContent=(cfg.meaningDelayMs/1000).toFixed(2)+" s";
-  $("mdelay-row").classList.toggle("off",cfg.mode!=="M2");
-  $("sl-mdelay").disabled=(cfg.mode!=="M2");
+  $("mdelay-row").classList.toggle("off",cfg.mode!=="on");
+  $("sl-mdelay").disabled=(cfg.mode!=="on");
   $("int-row").classList.toggle("off",cfg.run==="manual");
   $("sl-int").disabled=(cfg.run==="manual");
   $("lag-row").classList.toggle("off",cfg.run==="manual");
@@ -2862,7 +2871,7 @@ function endSession(){
   $("r-rewind").textContent=S.rewinds;
   const cond=[ORDER_LABEL[S.order],RUN_LABEL[cfg.run],MODE_LABEL[S.mode]];
   if(cfg.run==="auto"){ cond.push(`表示間隔 ${(cfg.intervalMs/1000).toFixed(2)}秒`,`遅延補正 ${cfg.lagMs}ms`); }
-  if(S.mode==="M2") cond.push(`語義遅延 ${(cfg.meaningDelayMs/1000).toFixed(2)}秒`);
+  if(S.mode==="on"&&cfg.meaningDelayMs>0) cond.push(`訳遅延 ${(cfg.meaningDelayMs/1000).toFixed(2)}秒`);
   cond.push(`発音 ${SPEAK_LABEL[cfg.speak]}`);
   $("res-cond").textContent=cond.join(" ／ ");
   renderMarked();
@@ -2891,6 +2900,24 @@ $("btn-home").addEventListener("click",()=>{
 $("btn-start").addEventListener("click",startSession);
 
 window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSetbar(); });
+
+/* 版はHTMLファイルの更新時刻をそのまま出す。
+   HTTPならサーバーが返す Last-Modified、file:// ならファイルの更新時刻。
+   手で書き換える必要がないので、更新したのに版が古いままという食い違いが起きない */
+(function(){
+  const el=$("ver"); if(!el) return;
+  const d=new Date(document.lastModified);
+  if(isNaN(d.getTime())){ el.textContent=""; return; }
+  const z=n=>String(n).padStart(2,"0");
+  el.textContent="Ver. "+d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+" "+z(d.getHours())+":"+z(d.getMinutes());
+})();
+
+/* Service Worker の登録。file:// で開いたときは登録できないので何もしない */
+if("serviceWorker" in navigator && location.protocol.slice(0,4)==="http"){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
 rebuildCards();
 if(cfg.palette==="night") cfg.palette="mono";
 if(!PALETTES[cfg.palette]) cfg.palette="default";
