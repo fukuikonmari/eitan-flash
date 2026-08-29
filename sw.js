@@ -1,4 +1,4 @@
-const C="eitan-flash-v1",F="eitan-flash-fonts-v1",S=["./","./index.html","./manifest.json","./icon-192.png","./icon-512.png","./icon-maskable.png","./icon.svg","./icon-maskable.svg"];
+const C="eitan-flash-v1",F="eitan-flash-fonts-v1",S=["./","./index.html","./manifest.json","./icon-180.png","./icon-192.png","./icon-512.png","./icon-maskable.png","./icon.svg","./icon-maskable.svg"];
 self.addEventListener("install",e=>e.waitUntil((async()=>{
   const c=await caches.open(C);
   await Promise.allSettled(S.map(async u=>{try{const r=await fetch(u,{cache:"reload"});if(r&&r.ok)await c.put(u,r);}catch(x){}}));

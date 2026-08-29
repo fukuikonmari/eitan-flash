@@ -4,12 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f0e9de">
+<meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="英単フラッシュ">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -55,12 +59,16 @@
   --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -20px rgba(0,0,0,.9);
 }
 *{box-sizing:border-box}
+/* iOSのホーム画面起動（standalone）では、上下の切り欠きとホームバーの領域に
+   画面が回り込む。safe-area の分だけ内側に寄せる */
+html,body{overscroll-behavior:none}
+body.playing{overflow:hidden}
 body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit;font-size:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* ============ 共通 ============ */
-.wrap{max-width:720px;margin:0 auto;padding:0 20px 80px}
+.wrap{max-width:720px;margin:0 auto;padding:env(safe-area-inset-top) calc(20px + env(safe-area-inset-right)) calc(80px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
 h1{font-family:var(--serif);font-weight:700;font-size:clamp(24px,5vw,34px);line-height:1.4;margin:0;text-wrap:balance}
 h2{font-family:var(--serif);font-weight:700;font-size:18px;margin:0 0 12px}
@@ -189,8 +197,10 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 /* モバイルのブラウザ下部バーが再生画面の下端を覆うと設定バーが押せなくなるため、
    ビューポートの実高さ（dvh）を使う */
 .player{position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;
-  background:var(--dp-bg);color:var(--dp-fg);display:flex;flex-direction:column;z-index:50}
-.p-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px;position:relative;z-index:3;flex:none}
+  background:var(--dp-bg);color:var(--dp-fg);display:flex;flex-direction:column;z-index:50;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+.p-top{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:3;flex:none;
+  padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 12px calc(12px + env(safe-area-inset-left))}
 .p-top .tbtns{display:flex;gap:8px;flex:none}
 .p-top .ctl{min-height:42px;padding:0 14px;touch-action:manipulation}
 .p-top .pos{font-family:var(--mono);font-size:13px;color:var(--dp-dim);font-variant-numeric:tabular-nums}
@@ -200,7 +210,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 .ctl.acc{background:var(--dp-acc);border-color:var(--dp-acc);color:var(--dp-on-acc);font-weight:700}
 .ctl.warn{border-color:var(--dp-warn);color:var(--dp-warn)}
 
-.taplayer{position:absolute;inset:0;z-index:1}
+.taplayer{position:absolute;inset:0;z-index:1;touch-action:manipulation}
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px 52px;position:relative;z-index:2;pointer-events:none;text-align:center;min-height:0}
 .word{font-family:var(--eng);font-weight:600;font-size:clamp(38px,11vw,76px);line-height:1.15;letter-spacing:-.015em;word-break:break-word}
 .meaning{font-size:clamp(16px,4.4vw,24px);color:var(--dp-dim);margin-top:18px;line-height:1.6;max-width:22em}
@@ -214,7 +224,8 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 .toast.undo{background:var(--dp-warn)}
 
 /* 操作ボタンは重ねず、常に画面下部の帯として置く。停止中もカードは隠さない */
-.actionbar{flex:none;position:relative;z-index:3;padding:0 12px 10px;display:flex;flex-direction:column;gap:8px}
+.actionbar{flex:none;position:relative;z-index:3;display:flex;flex-direction:column;gap:8px;
+  padding:0 calc(12px + env(safe-area-inset-right)) 10px calc(12px + env(safe-area-inset-left))}
 .arow{display:flex;gap:8px}
 .arow .ctl{flex:1;min-width:0;min-height:52px;padding:0 10px;font-size:15px;touch-action:manipulation}
 .arow .ctl.mark{background:var(--dp-acc);border-color:var(--dp-acc);color:var(--dp-on-acc);font-weight:700;font-size:16px}
@@ -223,8 +234,8 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 .arow.center{justify-content:center}
 .arow.center .ctl{flex:0 1 auto;width:min(100%,340px);min-height:56px}
 
-.setbar{flex:none;position:relative;z-index:3;border-top:1px solid var(--dp-line);background:var(--dp-bg);
-  padding:10px 12px calc(10px + env(safe-area-inset-bottom));max-height:56vh;overflow-y:auto}
+.setbar{flex:none;position:relative;z-index:3;border-top:1px solid var(--dp-line);background:var(--dp-bg);max-height:56vh;overflow-y:auto;
+  padding:10px calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
 .setbar .srow{display:flex;gap:8px;align-items:stretch;margin-bottom:8px}
 .setbar .seg2{flex:1;display:flex;border:1px solid var(--dp-line);border-radius:8px;overflow:hidden;min-width:0}
 .setbar .seg2 button{flex:1;min-width:0;border:0;background:transparent;color:var(--dp-dim);
@@ -2571,6 +2582,7 @@ function startSession(){
   S={queue:q,pos:0,maxPos:0,playing:false,cardStart:0,elapsed:0,runFrom:0,speaking:false,speakEndAt:0,
      log:[],shown:new Set(),marked:[],rewinds:0,cardAt:0,manual:(cfg.run==="manual"),mode:cfg.mode,order:cfg.order,startedAt:Date.now()};
   S1.classList.add("hide"); S3.classList.add("hide"); S2.classList.remove("hide");
+  document.body.classList.add("playing");
   syncSetbar();
   $("p-total").textContent=q.length;
   syncOnce=true; setPos(0);
@@ -2875,7 +2887,7 @@ function endSession(){
   cond.push(`発音 ${SPEAK_LABEL[cfg.speak]}`);
   $("res-cond").textContent=cond.join(" ／ ");
   renderMarked();
-  S2.classList.add("hide"); S3.classList.remove("hide"); window.scrollTo(0,0);
+  S2.classList.add("hide"); S3.classList.remove("hide"); document.body.classList.remove("playing"); window.scrollTo(0,0);
 }
 function renderMarked(){
   const el=$("r-list");
