@@ -388,7 +388,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 
   <div class="setbar" id="setbar">
     <div class="srow top">
-      <button class="ctl sm" id="btn-detail" aria-expanded="false">詳細 ▾</button>
+      <button class="ctl sm" id="btn-detail" aria-expanded="false">設定 ▾</button>
       <span class="condline" id="cond-line"></span>
     </div>
     <div id="detail" class="closed">
@@ -2818,11 +2818,11 @@ function syncSetbar(){
   $("rate-row").classList.toggle("off",mute);
   document.documentElement.style.setProperty("--barh",BAR()+"px");
 }
-$("btn-detail").textContent="詳細 ▸";
+$("btn-detail").textContent="設定 ▸";
 $("btn-detail").addEventListener("click",()=>{
   const d=$("detail"), open=d.classList.toggle("closed")===false;
   $("btn-detail").setAttribute("aria-expanded",String(open));
-  $("btn-detail").textContent=open?"詳細 ▾":"詳細 ▸";
+  $("btn-detail").textContent=open?"設定 ▾":"設定 ▸";
   document.documentElement.style.setProperty("--barh",BAR()+"px");
 });
 /* 音声合成が見つからない場合もボタンは残す。判定が外れている可能性があるため、
@@ -2924,7 +2924,7 @@ window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSe
    左右されないため、GitHub Pages でも確実に中身と一致する。
    BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
    ファイルの更新時刻を代わりに出す */
-const BUILD="2026-08-30 10:14";
+const BUILD="2026-08-30 10:32";
 (function(){
   const el=$("ver"); if(!el) return;
   const z=n=>String(n).padStart(2,"0");
