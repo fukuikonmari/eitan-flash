@@ -334,8 +334,8 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 
   <div class="card" style="margin-top:22px">
     <div class="pal" id="pal-seg" role="group" aria-label="配色">
-      <button data-pal="default" aria-label="標準" title="標準" aria-pressed="true"><span class="sw"><i style="background:#0c6b58"></i><i style="background:#f3f6f4"></i><i style="background:#0b1211"></i></span></button>
-      <button data-pal="konmari" aria-label="こんまり" title="こんまり" aria-pressed="false"><span class="sw"><i style="background:#7e7267"></i><i style="background:#f0e9de"></i><i style="background:#a67f6d"></i></span></button>
+      <button data-pal="konmari" aria-label="こんまり" title="こんまり" aria-pressed="true"><span class="sw"><i style="background:#7e7267"></i><i style="background:#f0e9de"></i><i style="background:#a67f6d"></i></span></button>
+      <button data-pal="default" aria-label="標準" title="標準" aria-pressed="false"><span class="sw"><i style="background:#0c6b58"></i><i style="background:#f3f6f4"></i><i style="background:#0b1211"></i></span></button>
       <button data-pal="mono" aria-label="モノクロ" title="モノクロ" aria-pressed="false"><span class="sw"><i style="background:#ffffff"></i><i style="background:#000000"></i><i style="background:#bdbdbd"></i></span></button>
       <button data-pal="orange" aria-label="オランジュ" title="オランジュ" aria-pressed="false"><span class="sw"><i style="background:#f07300"></i><i style="background:#14100c"></i><i style="background:#d9a441"></i></span></button>
       <button data-pal="monogram" aria-label="モノグラム" title="モノグラム" aria-pressed="false"><span class="sw"><i style="background:#c9a227"></i><i style="background:#17110b"></i><i style="background:#b5713f"></i></span></button>
@@ -2187,7 +2187,7 @@ const SAMPLE = parseCSV(SAMPLE_CSV).slice(1).map(r=>{
 
 /* ---------------- 保存 ---------------- */
 const KEY="eitango-flash-v1";
-const DEFAULTS={intervalMs:500,mode:"on",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:0,palette:"default"};
+const DEFAULTS={intervalMs:500,mode:"on",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:0,palette:"konmari"};
 let store={learned:{},settings:{...DEFAULTS},cards:null};
 try{
   const raw=localStorage.getItem(KEY);
@@ -2264,6 +2264,12 @@ function chipClick(key,values,e){
   if(!sel.length) sel=values.slice();                 // 全部外したら全選択に戻す
   cfg[key]=(sel.length===values.length)? null : sel;
   save(); renderHome();
+}
+/* Fisher-Yates。セッション開始時に1度だけ並べ替え、そのセッション中は順序を固定する */
+function shuffled(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
 }
 const MODE_LABEL={on:"訳あり",off:"訳なし"};
 const RUN_LABEL={auto:"自動再生",manual:"手動送り"};
