@@ -84,6 +84,7 @@ h2{font-family:var(--serif);font-weight:700;font-size:calc(18px * var(--fs));mar
 .seg button{flex:1;border:0;background:var(--surface);color:var(--ink-2);padding:9px 6px;font-size:calc(13.5px * var(--fs));border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.row .btn{white-space:nowrap}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .hide{display:none!important}
@@ -157,6 +158,7 @@ h2{font-family:var(--serif);font-weight:700;font-size:calc(18px * var(--fs));mar
 
 /* ============ S1 ホーム ============ */
 header.top{padding:44px 0 26px}
+#s1 header.top{text-align:center}   /* ホームの題字だけ中央に。結果画面は説明文が長いので左揃えのまま */
 .sub{margin:10px 0 0;color:var(--ink-2);font-size:calc(14.5px * var(--fs))}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 14px}
 .stat{background:var(--surface);padding:16px 14px;text-align:center}
@@ -361,11 +363,18 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
   <div class="card" style="margin-top:22px">
     <div class="pal" id="pal-seg" role="group" aria-label="配色">
       <button data-pal="konmari" aria-label="こんまり" title="こんまり" aria-pressed="true"><span class="sw"><i style="background:#7e7267"></i><i style="background:#f0e9de"></i><i style="background:#a67f6d"></i></span></button>
+      <button data-pal="paper" aria-label="ペーパー" title="ペーパー" aria-pressed="false"><span class="sw"><i style="background:#1f3f8f"></i><i style="background:#ffffff"></i><i style="background:#9b2f2f"></i></span></button>
       <button data-pal="default" aria-label="標準" title="標準" aria-pressed="false"><span class="sw"><i style="background:#0c6b58"></i><i style="background:#f3f6f4"></i><i style="background:#0b1211"></i></span></button>
       <button data-pal="mono" aria-label="モノクロ" title="モノクロ" aria-pressed="false"><span class="sw"><i style="background:#ffffff"></i><i style="background:#000000"></i><i style="background:#bdbdbd"></i></span></button>
       <button data-pal="orange" aria-label="オランジュ" title="オランジュ" aria-pressed="false"><span class="sw"><i style="background:#f07300"></i><i style="background:#14100c"></i><i style="background:#d9a441"></i></span></button>
       <button data-pal="monogram" aria-label="モノグラム" title="モノグラム" aria-pressed="false"><span class="sw"><i style="background:#c9a227"></i><i style="background:#17110b"></i><i style="background:#b5713f"></i></span></button>
-      <button data-pal="paper" aria-label="ペーパー" title="ペーパー" aria-pressed="false"><span class="sw"><i style="background:#1f3f8f"></i><i style="background:#ffffff"></i><i style="background:#9b2f2f"></i></span></button>
+    </div>
+    <div class="seg" id="sfx-seg" role="group" aria-label="マークの音" style="margin-top:14px">
+      <button data-sfx="off" aria-pressed="false">なし</button>
+      <button data-sfx="bell" aria-pressed="true">鈴</button>
+      <button data-sfx="wood" aria-pressed="false">木</button>
+      <button data-sfx="rise" aria-pressed="false">上がる</button>
+      <button data-sfx="drop" aria-pressed="false">しずく</button>
     </div>
   </div>
 
@@ -481,14 +490,15 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
     <div class="stat"><div class="k">戻った回数</div><div class="v" id="r-rewind">0</div></div>
   </div>
 
+  <div class="row" style="margin:22px 0 26px">
+    <button class="btn primary" id="btn-again" style="flex:1">もう一周</button>
+    <button class="btn" id="btn-home" style="flex:1">ホーム</button>
+  </div>
+
   <h2 style="margin-bottom:8px" id="r-head">このセッションでマークした単語</h2>
   <p class="note" style="margin:0 0 12px" id="r-note">誤ってマークしたものは「解除」で戻せます。</p>
   <div class="mlist" id="r-list"></div>
 
-  <div class="row" style="margin-top:22px">
-    <button class="btn primary" id="btn-again" style="flex:1">もう一周</button>
-    <button class="btn" id="btn-home" style="flex:1">ホーム</button>
-  </div>
 </div>
 
 <script>
@@ -2217,7 +2227,7 @@ const SAMPLE = parseCSV(SAMPLE_CSV).slice(1).map(r=>{
 
 /* ---------------- 保存 ---------------- */
 const KEY="eitango-flash-v1";
-const DEFAULTS={intervalMs:500,mode:"on",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:0,palette:"konmari",mark:"learned",onlyRepeat:false};
+const DEFAULTS={intervalMs:500,mode:"on",lagMs:300,onlyNew:true,useRange:false,from:1,to:50,pos:null,level:null,speak:"flow",rate:1.0,order:"seq",run:"auto",meaningDelayMs:0,palette:"konmari",mark:"learned",onlyRepeat:false,sfx:"bell"};
 let store={learned:{},repeat:{},settings:{...DEFAULTS},cards:null};
 try{
   const raw=localStorage.getItem(KEY);
@@ -2242,6 +2252,7 @@ else if(cfg.mode==="M2"){ cfg.mode="on"; migrated=true; }
 else if(cfg.mode==="M3"){ cfg.mode="off"; migrated=true; }
 if(["on","off"].indexOf(cfg.mode)<0) cfg.mode="on";
 if(["learned","weak"].indexOf(cfg.mark)<0) cfg.mark="learned";
+if(["off","bell","wood","rise","drop"].indexOf(cfg.sfx)<0) cfg.sfx="bell";
 if(migrated) save();
 
 /* ---------------- 参照 ---------------- */
@@ -2260,6 +2271,58 @@ const isLearned=id=>!!store.learned[id];
 /* 繰り返したい語として印を付けてある語。端末に残るので、日をまたいでも続きから回せる */
 const isRepeat=id=>!!store.repeat[id];
 const repeatCount=()=>CARDS.filter(c=>isRepeat(c.id)).length;
+
+/* ---------------- マークの音 ----------------
+   音のファイルは持たず、その場で波形を作って鳴らす。読み込みが要らず、
+   ファイルも増えないので、1枚のHTMLのままでいられる。
+   設計の基準は「短く・小さく・耳に残らない」。何百回も押すものなので、
+   長い音や高すぎる音は疲れる。 */
+let actx=null;
+function audio(){
+  try{
+    if(!actx){
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) return null;
+      actx=new AC();
+    }
+    if(actx.state==="suspended") actx.resume();   /* iOSは指で触れるまで止まっている */
+    return actx;
+  }catch(e){ return null; }
+}
+/* 正弦波を1つ。周波数を f0→f1 へ動かしながら音量をなめらかに落とす */
+function tone(ac,t0,f0,f1,dur,peak,type){
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.type=type||"sine";
+  o.frequency.setValueAtTime(f0,t0);
+  if(f1&&f1!==f0) o.frequency.exponentialRampToValueAtTime(f1,t0+dur*0.7);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(peak,t0+0.006);   /* 立ち上がりを少し鈍らせ、耳につく角を取る */
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(t0); o.stop(t0+dur+0.02);
+}
+/* kind: "mark"＝覚えた／"weak"＝繰り返す。
+   繰り返すほうは少し低く小さくして、同じボタンでも耳で区別がつくようにした */
+function playSfx(kind){
+  if(cfg.sfx==="off") return;
+  const ac=audio(); if(!ac) return;
+  const t=ac.currentTime+0.01;
+  const low=(kind==="weak"), k=low?0.75:1, v=low?0.75:1;
+  try{
+    if(cfg.sfx==="bell"){          /* 鈴：五度に重ねた、澄んで消えていく音 */
+      tone(ac,t,1318.5*k,0,0.42,0.13*v);
+      tone(ac,t,1975.5*k,0,0.30,0.06*v);
+    }else if(cfg.sfx==="wood"){    /* 木：拍子木のような、短く乾いた音 */
+      tone(ac,t,720*k,430*k,0.13,0.16*v,"triangle");
+      tone(ac,t,1440*k,900*k,0.06,0.05*v);
+    }else if(cfg.sfx==="rise"){    /* 上がる：二音が上がる、進んだ感じの音 */
+      tone(ac,t,784*k,0,0.13,0.11*v);
+      tone(ac,t+0.075,1174.7*k,0,0.20,0.11*v);
+    }else if(cfg.sfx==="drop"){    /* しずく：高いところから落ちる、やわらかい音 */
+      tone(ac,t,1250*k,620*k,0.24,0.12*v);
+    }
+  }catch(e){}
+}
 
 /* ---------------- ホーム ---------------- */
 function scopeIds(){
@@ -2343,6 +2406,7 @@ function renderHome(){
   $("home-speak").textContent=SPEAK_LABEL[cfg.speak];
   $("tts-status").textContent=ttsStatus();
   [...$("pal-seg").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.pal===cfg.palette)));
+  [...$("sfx-seg").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.sfx===cfg.sfx)));
   $("data-count").textContent=CARDS.length;
   $("data-src").textContent=(store.cards&&store.cards.length)?"読み込んだCSV":"同梱の1712語";
   $("sc-new").checked=!!cfg.onlyNew;
@@ -2545,6 +2609,12 @@ $("btn-sample").addEventListener("click",()=>{
 $("pal-seg").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
   cfg.palette=b.dataset.pal; save(); applyPalette(); renderHome();
+});
+/* 音を選ぶと、その場で鳴らして聴き比べられる */
+$("sfx-seg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  cfg.sfx=b.dataset.sfx; save(); renderHome();
+  playSfx("mark");
 });
 $("btn-tts-test").addEventListener("click",()=>{
   loadVoices();
@@ -2787,12 +2857,14 @@ function markAt(p,{toast=true}={}){
     if(S.marked.includes(id)){ if(toast) showToast("チェック済："+w.word,true); return; }
     S.marked.push(id);
     store.repeat[id]={at:new Date().toISOString()}; save();
+    playSfx("weak");
     if(toast) showToast("繰り返す："+w.word);
     return;
   }
   if(isLearned(id)){ if(toast) showToast("暗記済のまま："+w.word,true); return; }
   store.learned[id]={at:new Date().toISOString()}; save();
   if(!S.marked.includes(id)) S.marked.push(id);
+  playSfx("mark");
   if(toast) showToast("覚えた："+w.word);
 }
 function unmarkAt(p){
@@ -2973,7 +3045,7 @@ function endSession(){
   $("r-note").textContent=weak
     ? "この一覧がそのまま次の周の出題になります。間違えてチェックしたものは「外す」で除けます。"
     : "誤ってマークしたものは「解除」で戻せます。";
-  $("btn-again").textContent=weak?(n?"次の周へ（"+n+"語）":"はじめから もう一周"):"もう一周";
+  $("btn-again").textContent=weak?(n?"次の周へ":"もう一周"):"もう一周";
   const cond=[];
   if(weak) cond.push(S.lap+"周目");
   cond.push(ORDER_LABEL[S.order],RUN_LABEL[cfg.run],MODE_LABEL[S.mode]);
@@ -3013,7 +3085,7 @@ $("r-list").addEventListener("click",e=>{
     const n=S.marked.length;
     renderMarked();
     $("r-marked").textContent=n;
-    $("btn-again").textContent=n?"次の周へ（"+n+"語）":"はじめから もう一周";
+    $("btn-again").textContent=n?"次の周へ":"もう一周";
     return;
   }
   if(isLearned(id)) delete store.learned[id]; else store.learned[id]={at:new Date().toISOString()};
@@ -3039,7 +3111,7 @@ window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSe
    左右されないため、GitHub Pages でも確実に中身と一致する。
    BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
    ファイルの更新時刻を代わりに出す */
-const BUILD="2026-08-30 16:29";
+const BUILD="2026-08-30 17:34";
 (function(){
   const el=$("ver"); if(!el) return;
   const z=n=>String(n).padStart(2,"0");
