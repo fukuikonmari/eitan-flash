@@ -2266,8 +2266,13 @@ function scopeIds(){
   const a=Math.min(cfg.from,cfg.to), b=Math.max(cfg.from,cfg.to);
   const ps=cfg.pos, ls=cfg.level;
   return CARDS.filter(c=>{
-    if(cfg.onlyNew && isLearned(c.id)) return false;
-    if(cfg.onlyRepeat && !isRepeat(c.id)) return false;
+    /* 「未暗記のみ」と「繰り返したい語のみ」は、どちらかに当てはまれば出す。
+       両方チェックすると、未暗記の語と繰り返したい語を合わせた全部が対象になる。
+       番号・品詞・レベルの絞り込みは、そのうえでさらに掛け合わせる */
+    if(cfg.onlyNew || cfg.onlyRepeat){
+      const ok=(cfg.onlyNew && !isLearned(c.id)) || (cfg.onlyRepeat && isRepeat(c.id));
+      if(!ok) return false;
+    }
     if(cfg.useRange && (c.id<a||c.id>b)) return false;
     if(ps && ps.indexOf(String(c.pos==null?"":c.pos))<0) return false;
     if(ls && ls.indexOf(String(c.level==null?"":c.level))<0) return false;
@@ -3034,7 +3039,7 @@ window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSe
    左右されないため、GitHub Pages でも確実に中身と一致する。
    BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
    ファイルの更新時刻を代わりに出す */
-const BUILD="2026-08-30 15:36";
+const BUILD="2026-08-30 16:15";
 (function(){
   const el=$("ver"); if(!el) return;
   const z=n=>String(n).padStart(2,"0");
