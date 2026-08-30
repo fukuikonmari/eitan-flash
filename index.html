@@ -25,7 +25,7 @@
 <style>
 :root{
   /* 文字の大きさはこの1つの倍率でまとめて決まる。1.00が元の大きさ */
-  --fs:1.14;
+  --fs:1.00;
   --ground:#f3f6f4; --surface:#ffffff; --surface-2:#eaefec;
   --ink:#141d1a; --ink-2:#3a4a45; --muted:#66776f;
   --line:#d3ded8; --line-strong:#b3c4bc;
@@ -81,7 +81,7 @@ h2{font-family:var(--serif);font-weight:700;font-size:calc(18px * var(--fs));mar
 .btn.primary:hover{color:var(--accent-ink);filter:brightness(1.08)}
 .btn.big{width:100%;padding:16px;font-size:calc(17px * var(--fs));border-radius:10px}
 .seg{display:flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden}
-.seg button{flex:1;border:0;background:var(--surface);color:var(--ink-2);padding:9px 6px;font-size:calc(13.5px * var(--fs));border-right:1px solid var(--line)}
+.seg button{flex:1;border:0;background:var(--surface);color:var(--ink-2);min-height:44px;padding:9px 6px;font-size:calc(13.5px * var(--fs));border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
 .row .btn{white-space:nowrap}
@@ -179,22 +179,22 @@ header.top{padding:44px 0 26px}
 .note{font-size:calc(13px * var(--fs));color:var(--muted);margin:14px 0 0}
 .note b{color:var(--ink-2);font-weight:500}
 .linkbar{display:flex;gap:16px;margin:24px 0 0;font-size:calc(13px * var(--fs))}
-.linkbar button{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:0}
+.linkbar button{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:0;min-height:44px;display:inline-flex;align-items:center}
 .linkbar button:hover{color:var(--accent)}
 .verbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:28px 0 0}
-.verbar .mini{min-height:38px;padding:0 14px}
+.verbar .mini{min-height:44px;padding:0 16px}
 .ver{margin:0;font-family:var(--mono);font-size:calc(11px * var(--fs));letter-spacing:.06em;color:var(--muted);opacity:.8}
-.chk{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:calc(14px * var(--fs));color:var(--ink-2);cursor:pointer;min-height:32px}
+.chk{display:flex;align-items:center;gap:9px;margin:6px 0 0;font-size:calc(14px * var(--fs));color:var(--ink-2);cursor:pointer;min-height:44px}
 .fgroup{margin:20px 0 0}
 .fhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
 .fhead span{font-size:calc(12.5px * var(--fs));font-family:var(--mono);letter-spacing:.08em;color:var(--muted)}
-.mini{background:none;border:1px solid var(--line-strong);color:var(--muted);border-radius:6px;padding:5px 10px;font-size:calc(12px * var(--fs))}
+.mini{background:none;border:1px solid var(--line-strong);color:var(--muted);border-radius:6px;min-height:44px;padding:5px 12px;font-size:calc(12px * var(--fs))}
 .mini:hover{border-color:var(--accent);color:var(--accent)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);
-  border-radius:999px;padding:0 15px;min-height:40px;font-size:calc(13.5px * var(--fs));touch-action:manipulation}
+  border-radius:999px;padding:0 15px;min-height:44px;font-size:calc(13.5px * var(--fs));touch-action:manipulation}
 .chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
-.chk input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.chk input{width:22px;height:22px;accent-color:var(--accent);flex:none}
 code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--line);padding:.08em .38em;border-radius:4px;white-space:nowrap}
 #csv-text{width:100%;margin-top:14px;font-family:var(--mono);font-size:max(16px,calc(11.5px * var(--fs)));line-height:1.5;
   background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
@@ -216,10 +216,10 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 .ctl.acc{background:var(--dp-acc);border-color:var(--dp-acc);color:var(--dp-on-acc);font-weight:700}
 .ctl.warn{border-color:var(--dp-warn);color:var(--dp-warn)}
 
-.taplayer{position:absolute;inset:0;z-index:1;touch-action:manipulation}
-.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px 52px;position:relative;z-index:2;pointer-events:none;text-align:center;min-height:0}
-.word{font-family:var(--eng);font-weight:600;font-size:clamp(calc(38px * var(--fs)),calc(11vw * var(--fs)),calc(76px * var(--fs)));line-height:1.15;letter-spacing:-.015em;word-break:break-word}
-.meaning{font-size:clamp(calc(16px * var(--fs)),calc(4.4vw * var(--fs)),calc(24px * var(--fs)));color:var(--dp-dim);margin-top:18px;line-height:1.6;max-width:22em}
+.taplayer{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;z-index:1;touch-action:manipulation}   /* insetは古いiOSに無いので、個別指定も残す */
+.stage{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px 52px;position:relative;z-index:2;pointer-events:none;text-align:center;min-height:150px;overflow:hidden}   /* 設定を開いて場所が足りないときは、ここではなく設定バーのほうを縮める */
+.word{font-family:var(--eng);font-weight:600;font-size:clamp(46px,15vw,110px);line-height:1.15;letter-spacing:-.015em;white-space:nowrap}
+.meaning{font-size:clamp(20px,6vw,34px);color:var(--dp-dim);margin-top:20px;line-height:1.6;white-space:nowrap;max-width:100%}
 .meaning.ghost{opacity:.18}
 .badge{margin-top:22px;font-family:var(--mono);font-size:calc(11px * var(--fs));letter-spacing:.14em;text-transform:uppercase;color:var(--dp-acc);border:1px solid var(--dp-acc);border-radius:99px;padding:3px 12px}
 
@@ -241,7 +241,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
 .arow.center{justify-content:center}
 .arow.center .ctl{flex:0 1 auto;width:min(100%,340px);min-height:56px}
 
-.setbar{flex:none;position:relative;z-index:3;border-top:1px solid var(--dp-line);background:var(--dp-bg);max-height:56vh;overflow-y:auto;
+.setbar{flex:0 1 auto;min-height:0;position:relative;z-index:3;border-top:1px solid var(--dp-line);background:var(--dp-bg);max-height:56vh;overflow-y:auto;
   padding:10px calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
 .setbar .srow{display:flex;gap:8px;align-items:stretch;margin-bottom:8px}
 .setbar .seg2{flex:1;display:flex;border:1px solid var(--dp-line);border-radius:8px;overflow:hidden;min-width:0}
@@ -266,8 +266,8 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
   .arow .ctl{min-height:46px}
   .arow.center .ctl{min-height:48px}
   .stage{padding:8px 24px 14px}
-  .word{font-size:clamp(calc(24px * var(--fs)),7.5vw,calc(46px * var(--fs)))}
-  .meaning{margin-top:8px;font-size:clamp(calc(14px * var(--fs)),3.2vw,calc(19px * var(--fs)))}
+  .word{font-size:clamp(28px,7vw,62px)}
+  .meaning{margin-top:8px;font-size:clamp(16px,3vw,24px)}
   .badge{margin-top:10px}
 }
 .setbar #detail.closed{display:none}
@@ -2757,6 +2757,23 @@ function nextCard(){
   if(S.pos>=S.queue.length-1){ endSession(); return; }
   setPos(S.pos+1);
 }
+/* 単語と訳は1行に収める。折り返すと行数で高さが変わり、目線の位置が動いて読みにくい。
+   長い語は、はみ出す分だけ文字を小さくして1行に押し込む。
+   基準の大きさに戻してから幅を測り、収まらないときだけ縮める */
+function fitLine(el){
+  el.style.fontSize="";
+  if(!el.textContent) return;
+  /* この要素は中身の幅そのままに広がるので、自分の幅を見ても はみ出しは分からない。
+     親（表示エリア）の内側の幅と比べる */
+  const stage=el.parentElement, cs=getComputedStyle(stage);
+  const avail=stage.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  /* 要素の幅は上限で頭打ちになることがあるので、文字そのものの幅を測る */
+  const rg=document.createRange(); rg.selectNodeContents(el);
+  const ink=rg.getBoundingClientRect().width;
+  if(!(avail>0)||!(ink>0)||ink<=avail) return;
+  const base=parseFloat(getComputedStyle(el).fontSize);
+  el.style.fontSize=Math.max(11,base*(avail/ink)*0.99)+"px";
+}
 function render(){
   const w=byId.get(S.queue[S.pos]);
   $("p-word").textContent=w.word;
@@ -2775,6 +2792,7 @@ function render(){
   $("btn-mark").textContent=on?"チェックを外す":(weak?"繰り返す":"覚えた");
   $("btn-mark").classList.toggle("on",on);
   $("btn-mark").classList.toggle("weak",weak&&!on);
+  fitLine($("p-word")); fitLine(m);
 }
 /* 手動送りでは一時停止という状態がないので、右上の一時停止ボタンを隠し、
    前へ・次への行を常に出す。画面タップは自動なら一時停止、手動なら次へ */
@@ -3104,14 +3122,18 @@ $("btn-home").addEventListener("click",()=>{
 });
 $("btn-start").addEventListener("click",startSession);
 
-window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSetbar(); });
+window.addEventListener("resize",()=>{
+  if(S2.classList.contains("hide")) return;
+  syncSetbar();
+  if(S){ fitLine($("p-word")); fitLine($("p-meaning")); }   /* 画面の向きが変わったら測り直す */
+});
 
 /* 版はこのファイルを書き出した時刻。書き出すたびに下の1行が入れ替わるので、
    手で書き換える必要はない。サーバーが Last-Modified を返すかどうかに
    左右されないため、GitHub Pages でも確実に中身と一致する。
    BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
    ファイルの更新時刻を代わりに出す */
-const BUILD="2026-08-30 17:34";
+const BUILD="2026-08-30 19:23";
 (function(){
   const el=$("ver"); if(!el) return;
   const z=n=>String(n).padStart(2,"0");
