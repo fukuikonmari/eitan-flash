@@ -375,7 +375,7 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
   </div>
 
   <div class="linkbar">
-    <button id="btn-tts-test">発音をテスト（hello と鳴ります）</button>
+    <button id="btn-tts-test">発音をテスト（hello）</button>
     <button id="btn-reset">進捗をすべてリセット</button>
   </div>
   <p class="note" id="tts-status" style="margin-top:10px"></p>
@@ -3039,7 +3039,7 @@ window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSe
    左右されないため、GitHub Pages でも確実に中身と一致する。
    BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
    ファイルの更新時刻を代わりに出す */
-const BUILD="2026-08-30 16:15";
+const BUILD="2026-08-30 16:29";
 (function(){
   const el=$("ver"); if(!el) return;
   const z=n=>String(n).padStart(2,"0");
