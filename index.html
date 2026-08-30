@@ -2919,15 +2919,19 @@ $("btn-start").addEventListener("click",startSession);
 
 window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSetbar(); });
 
-/* 版はHTMLファイルの更新時刻をそのまま出す。
-   HTTPならサーバーが返す Last-Modified、file:// ならファイルの更新時刻。
-   手で書き換える必要がないので、更新したのに版が古いままという食い違いが起きない */
+/* 版はこのファイルを書き出した時刻。書き出すたびに下の1行が入れ替わるので、
+   手で書き換える必要はない。サーバーが Last-Modified を返すかどうかに
+   左右されないため、GitHub Pages でも確実に中身と一致する。
+   BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
+   ファイルの更新時刻を代わりに出す */
+const BUILD="2026-08-30 10:14";
 (function(){
   const el=$("ver"); if(!el) return;
-  const d=new Date(document.lastModified);
-  if(isNaN(d.getTime())){ el.textContent=""; return; }
   const z=n=>String(n).padStart(2,"0");
-  el.textContent="Ver. "+d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+" "+z(d.getHours())+":"+z(d.getMinutes());
+  const fmt=d=>"Ver. "+d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+" "+z(d.getHours())+":"+z(d.getMinutes());
+  if(BUILD.indexOf("__")!==0){ el.textContent="Ver. "+BUILD; return; }
+  const d=new Date(document.lastModified);
+  el.textContent=isNaN(d.getTime())?"":fmt(d);
 })();
 
 /* Service Worker の登録。file:// で開いたときは登録できないので何もしない */
