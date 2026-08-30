@@ -179,7 +179,9 @@ header.top{padding:44px 0 26px}
 .linkbar{display:flex;gap:16px;margin:24px 0 0;font-size:calc(13px * var(--fs))}
 .linkbar button{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:0}
 .linkbar button:hover{color:var(--accent)}
-.ver{margin:28px 0 0;font-family:var(--mono);font-size:calc(11px * var(--fs));letter-spacing:.06em;color:var(--muted);opacity:.8}
+.verbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:28px 0 0}
+.verbar .mini{min-height:38px;padding:0 14px}
+.ver{margin:0;font-family:var(--mono);font-size:calc(11px * var(--fs));letter-spacing:.06em;color:var(--muted);opacity:.8}
 .chk{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:calc(14px * var(--fs));color:var(--ink-2);cursor:pointer;min-height:32px}
 .fgroup{margin:20px 0 0}
 .fhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
@@ -378,7 +380,11 @@ code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:
   </div>
   <p class="note" id="tts-status" style="margin-top:10px"></p>
   <p class="note" style="margin-top:26px">進捗はこの端末のブラウザ内にだけ保存されます。</p>
-  <p class="ver" id="ver"></p>
+  <div class="verbar">
+    <span class="ver" id="ver"></span>
+    <button class="mini" id="btn-update">最新に更新</button>
+  </div>
+  <p class="note" id="upd-msg" style="margin-top:8px"></p>
 </div>
 
 <!-- ================= S2 再生 ================= -->
@@ -3028,7 +3034,7 @@ window.addEventListener("resize",()=>{ if(!S2.classList.contains("hide")) syncSe
    左右されないため、GitHub Pages でも確実に中身と一致する。
    BUILD が入っていない（生の作業ファイルを直接開いた）ときだけ、
    ファイルの更新時刻を代わりに出す */
-const BUILD="2026-08-30 15:22";
+const BUILD="2026-08-30 15:36";
 (function(){
   const el=$("ver"); if(!el) return;
   const z=n=>String(n).padStart(2,"0");
@@ -3036,6 +3042,57 @@ const BUILD="2026-08-30 15:22";
   if(BUILD.indexOf("__")!==0){ el.textContent="Ver. "+BUILD; return; }
   const d=new Date(document.lastModified);
   el.textContent=isNaN(d.getTime())?"":fmt(d);
+})();
+
+/* 「最新に更新」。ブラウザとService Workerが持っている古いHTMLを捨てて、
+   サーバーの最新を取りに行く。手順は次のとおり。
+   1. 先にキャッシュを空にする。Service Workerは同じ場所のファイルをキャッシュ優先で
+      返すので、消しておかないと「取り直した」つもりで古い中身を読んでしまう
+   2. HTMLを cache:"reload" で取り直す。ブラウザが持っている分も無視して通信に行く
+   3. 取れた中身の版といま動いている版を比べ、同じなら読み直さずに知らせるだけ
+   4. 違えばService Workerを入れ直して読み直す
+   進捗は localStorage にあり、ここでは触らないので消えない */
+(function(){
+  const btn=$("btn-update"), msg=$("upd-msg");
+  if(!btn) return;
+  if(location.protocol.slice(0,4)!=="http"){ btn.classList.add("hide"); return; }
+  const label=btn.textContent;
+  async function dropCaches(){
+    try{
+      if(!window.caches) return;
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(k=>k.indexOf("eitan-flash-")===0).map(k=>caches.delete(k)));
+    }catch(e){}
+  }
+  btn.addEventListener("click",async()=>{
+    btn.disabled=true; btn.textContent="確認中…"; msg.textContent="";
+    await dropCaches();
+    let latest=null;
+    try{
+      const res=await fetch("./index.html",{cache:"reload"});
+      if(res&&res.ok){
+        const m=(await res.text()).match(/const BUILD="([^"]*)"/);
+        if(m) latest=m[1];
+      }
+    }catch(e){}
+    try{
+      if("serviceWorker" in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.update().catch(()=>{})));
+      }
+    }catch(e){}
+    if(latest===null){
+      msg.textContent="サーバーに繋がりませんでした。通信を確認して、もう一度お試しください。";
+      btn.disabled=false; btn.textContent=label; return;
+    }
+    if(BUILD.indexOf("__")!==0 && latest===BUILD){
+      msg.textContent="すでに最新です（Ver. "+BUILD+"）。";
+      btn.disabled=false; btn.textContent=label; return;
+    }
+    btn.textContent="更新中…";
+    msg.textContent="Ver. "+latest+" に更新します。進捗はそのまま残ります。";
+    setTimeout(()=>location.reload(),500);
+  });
 })();
 
 /* Service Worker の登録。file:// で開いたときは登録できないので何もしない */
